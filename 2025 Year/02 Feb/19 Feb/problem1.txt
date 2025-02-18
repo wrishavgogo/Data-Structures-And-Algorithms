@@ -1,0 +1,200 @@
+Link : https://leetcode.com/problems/integer-to-roman/description/ 
+
+Statement 
+
+Seven different symbols represent Roman numerals with the following values:
+
+Symbol	Value
+I	1
+V	5
+X	10
+L	50
+C	100
+D	500
+M	1000
+Roman numerals are formed by appending the conversions of decimal place values from highest to lowest. Converting a decimal place value into a Roman numeral has the following rules:
+
+If the value does not start with 4 or 9, select the symbol of the maximal value that can be subtracted from the input, append that symbol to the result, subtract its value, and convert the remainder to a Roman numeral.
+If the value starts with 4 or 9 use the subtractive form representing one symbol subtracted from the following symbol, for example, 4 is 1 (I) less than 5 (V): IV and 9 is 1 (I) less than 10 (X): IX. Only the following subtractive forms are used: 4 (IV), 9 (IX), 40 (XL), 90 (XC), 400 (CD) and 900 (CM).
+Only powers of 10 (I, X, C, M) can be appended consecutively at most 3 times to represent multiples of 10. You cannot append 5 (V), 50 (L), or 500 (D) multiple times. If you need to append a symbol 4 times use the subtractive form.
+Given an integer, convert it to a Roman numeral.
+
+ 
+
+Example 1:
+
+Input: num = 3749
+
+Output: "MMMDCCXLIX"
+
+
+
+
+My Experience : I used strategy design pattern and used recursive way to build the solution and initially was facing issues to come up with a solution but later was able to find a 
+generic solution to write a production level code 
+
+Wrote comments for explanation 
+
+
+
+
+class Solution {
+
+    
+
+    private final static int[] divisorArray = new int[]{1000 , 500 , 100 , 50 , 10 , 5 , 1};
+    
+    private static final String EMPTY_STRING = "";
+
+    Map<Integer , String> integerToRomanMap = new HashMap<>() {{
+            put(1,"I");
+            put(5,"V");
+            put(10,"X");
+            put(50,"L");
+            put(100,"C");
+            put(500,"D");
+            put(1000,"M");
+    }};
+
+    RomanStrategy subtractiveStrategy = new SubtractiveStrategy();
+    RomanStrategy normalStrategy = new NormalStrategy();
+
+    public String intToRoman(int num) {
+        
+        return recursiveString(num , 0);
+        
+    }
+
+    public String recursiveString(int num , int index) {
+
+        if(index >= divisorArray.length) {
+            return EMPTY_STRING;
+        }
+
+        int divisor = divisorArray[index];
+
+        if(divisor > num ) {
+            // if divisor if greater than number you need to change the number as well 
+            return recursiveString(num , index + 1);
+        }
+
+        int quotient = num / divisor;
+        int remainder = num % divisor;
+
+        String numString = String.valueOf(num);
+        StringBuilder result = new StringBuilder();
+            
+        if(numString.length() > 3) {
+            // SINCE WE ARE ONLY given roman till 1000 , 
+            // we need not take care of numbers like 4000 , 9000 and such 
+            // 400 , 900 , 439 , 938 these types of numbers we should take care 
+            // which has length <= 3 
+            result.append(normalStrategy.getRomanRepresentation(numString , divisor , quotient , remainder , -1 , integerToRomanMap));
+
+        } else {
+            
+            result.append(switch (numString.charAt(0)) {
+                // to be subtracted from 5
+                case '4' -> {
+
+                    int len = numString.length() - 1;
+                    // because you either subtract 4 , 40 or 400 from num , rest goes for evaluation again 
+                    remainder = num - 4*(int)Math.pow(10 , len);
+                    yield subtractiveStrategy.getRomanRepresentation(numString , divisor , quotient , remainder , 5 , integerToRomanMap);
+                }
+                // to be subtracted from 10
+                case '9' -> {
+                    
+                    int len = numString.length() - 1;
+                    // because you either subtract 9 , 90 or 900 from num , rest goes for evaluation again 
+                    remainder = num - 9*(int)Math.pow(10 , len);
+                    yield subtractiveStrategy.getRomanRepresentation(numString , divisor , quotient , remainder , 10 , integerToRomanMap);
+                }
+                // to be evaluated normally
+                default -> normalStrategy.getRomanRepresentation(numString , divisor , quotient , remainder , -1 , integerToRomanMap );
+            });
+
+        }
+
+        result.append(recursiveString(remainder , index + 1));
+
+        return result.toString();
+    }
+
+    
+}
+
+interface RomanStrategy {
+
+    public String getRomanRepresentation(String num , int divisor , int quotient , int remainder , int subtractFrom , Map<Integer , String> integerToRomanMap );
+
+}
+
+class SubtractiveStrategy implements RomanStrategy{
+
+    public String getRomanRepresentation(String num , int divisor , int quotient , int remainder , int subtractFrom, Map<Integer , String> integerToRomanMap ) {
+        
+        //System.out.println("inside subtractive -->  " + num + " " + divisor + " " + quotient + " " + remainder + " " + subtractFrom);
+        int len = num.length();
+        len--;
+        // to be subtracted from 5 or 50 or 500 
+        // or to be subtracted from 10 , or 100 or 1000 
+        int subtractee = (int) Math.pow(10 , len);
+        StringBuilder romanStringBuilder = new StringBuilder(integerToRomanMap.get(subtractee));
+        int multipleOf = subtractee * subtractFrom;
+        romanStringBuilder.append(integerToRomanMap.get(multipleOf));
+        return romanStringBuilder.toString();
+    }
+
+}
+
+class NormalStrategy implements RomanStrategy{
+
+    public String getRomanRepresentation(String num , int divisor , int quotient , int remainder , int subtractFrom, Map<Integer , String> integerToRomanMap) {
+        
+        //System.out.println("inside normal -->  " + num + " " + divisor + " " + quotient + " " + remainder + " " + subtractFrom);
+        StringBuilder result = new StringBuilder();
+        String romanString = integerToRomanMap.get(divisor);
+        while(quotient > 0) {
+            quotient--;
+            result.append(romanString);
+        }
+        return result.toString();
+    }
+
+}
+
+
+                                                        ***************************************
+
+Leetcode editorial , damn good solution , keep a map which handles this starting with '4' and starting with '9' scenario case already . 
+
+value_symbols = [
+    (1000, 'M'), (900, 'CM'), (500, 'D'), (400, 'CD'),
+    (100, 'C'), (90, 'XC'), (50, 'L'), (40, 'XL'), (10, 'X'),
+    (9, 'IX'), (5, 'V'), (4, 'IV'), (1, 'I')
+]
+
+
+Now do the same logic , start from 1000 , 900 , 500 , 400 , 100 , 90 ... and so on 
+
+just add the logic , 
+
+if(divisor > num ) 
+  then reduce the go the next smaller divisor , 
+
+
+If a number like 1700 comes , 
+
+then first 1000 will be picked and num becomes 700 
+and then 700 we will have 900 , but 900 > 700 , so 500 will be choosen 
+
+if 1900 is the number 
+then 900 when it comes after -1000 ,  then 900 will be picked , 
+
+similarly for 1400 , 
+
+So numbers starting with 9 or 4 are already taken care by the creating this new map 
+
+Very nice solution this is 
+

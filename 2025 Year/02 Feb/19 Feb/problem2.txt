@@ -1,0 +1,46 @@
+ Longest Consecutive Sequence 
+
+Link :- https://leetcode.com/problems/longest-consecutive-sequence/description/?envType=problem-list-v2&envId=union-find  
+
+Given an unsorted array of integers nums, return the length of the longest consecutive elements sequence.
+
+You must write an algorithm that runs in O(n) time.
+
+ 
+
+Example 1:
+
+Input: nums = [100,4,200,1,3,2]
+Output: 4
+Explanation: The longest consecutive elements sequence is [1, 2, 3, 4]. Therefore its length is 4.
+
+
+
+Optimal Approach with O(n) complexity 
+
+use a set to first of all populate all items 
+HashSet ---> [100,4,200,1,3,2] 
+
+start the loop from i = 0 and go till i = n - 1 
+
+GlobalAns longestLength = 1;
+
+for each i ,
+LocalLength
+check if nums[i] + 1 is present or not , 
+then check nums[i] + 2 is present or not ,
+then check nums[i] + 3 is present or not , LocalLength++
+
+but just for each i add an additional condition 
+
+if(nums[i] - 1) is present in the set for each i then dont do the operation 
+Why????????????/
+
+because for that nums[i] - 1 , evaluation would have done before or will be done implicitly in future 
+
+lets say nums[i] - 1 was present before nums[i] then surely when i reached there , it would have done the operation on 
+
+nums[i] - 1 , nums[i] , nums[i] + 1 , nums[i] + 2 
+
+Similarly if nums[i] - 1 , arrives in the future you could take care of it in future and skip this nums[i] 
+

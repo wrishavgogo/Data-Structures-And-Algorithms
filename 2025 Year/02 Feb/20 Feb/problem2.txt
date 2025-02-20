@@ -1,0 +1,20 @@
+For questions like find the no of provinces . Dont always think of DSU , sometimes simple DFS will solve the problem 
+
+
+Question : 
+
+Basically you are given a graph , disconnected undirected graph. You want to find out the number of sub graphs that are there .
+
+
+
+My Learnings :
+
+I know your first instinct is to think about DSU , yes that will solve it 
+
+But it can be done with DFS and a bit faster as well . Lets say you have a visited array for the vertex . 
+You start traversing from V = 0 ..... to V = n - 1 . 
+
+For each V you start by doing a DFS and and you keep marking the node visited in its subgraph . ---> then do count ++ 
+
+Next time when a node comes which is not visited , you can understand this part of the new subgraph , do a count++ and run a dfs and mark the subgraph's node as visited 
+and continue 

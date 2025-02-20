@@ -1,0 +1,72 @@
+Link : https://www.geeksforgeeks.org/problems/graph-and-vertices/1?utm_source=youtube&utm_medium=collab_striver_ytdescription&utm_campaign=graph-and-vertices 
+
+
+Problem Statement : 
+
+Given an integer n representing number of vertices. Find out how many undirected graphs (not necessarily connected) can be constructed out of a given n number of vertices.
+
+ 
+
+Example 1:
+
+Input: 2
+Output: 2
+Example 2:
+
+Input: 5
+Output: 1024
+ 
+
+Your Task:
+
+Complete the function count() which takes an integer n as input and return the count of total number of graphs possible.
+
+
+
+My Experience : 
+
+I was trying to join the vertices and see how many possible ways a new vertex can be added to the set of graphs formed using n - 1 vertices .
+Doing that i was not able to figure out any concrete solution . It was becoming a NP problem and was not converging . 
+
+I was thinking lets say n - 1 vertices formed x graphs . 
+Now adding one more edge but to which graph and which vertex of the graph . Lets say you want to add this vertex to some sub graph of the disconnected component of the graph .
+But the thing is you cannot keep track of all these things 
+
+
+
+
+
+Learnings : 
+
+The solution completetly looked at the problem from a different perspective . Lets say we now decide the formation of the graph by choosing the number of edges .
+
+how many total number of edges can be there with n vertices ? 
+
+1 -----> can form edges with 2 , 3 , 4 , ... n  = n - 1 edges 
+2 -----> can form edges with 3 , 4 , 5 , ...  n = n - 2 edges ( since its undirected hence we dont consider 2 - 1 edge as it was already formed ahead ) 
+3 -----> can form edges with 4 , 5 , 6 , .. .n = n - 3 edges 
+.
+.
+.
+.
+n ----> can form edges with no one = 0 
+
+so totalEdges = ( n - 1 ) + ( n - 2 ) + ( n - 3 ) + . . . .. . .. + 1 = ((n)*(n - 1))/2 = X
+
+Back to how many graphs can be formed using N vertices .
+
+No of graphs with no edge = XC0;
+No of graphs with 1 edge = XC1;
+No of graphs with 2 edges = XC2;
+No of graphs with 3 edges = XC3;
+.
+.
+.
+.
+No of graphs with X edges = XCX;
+
+total number of graphs = XC0 + XC1 + XC2 + .... + XCX = 2^X; 
+
+this is what becomes . 
+
+Amazing thought process 

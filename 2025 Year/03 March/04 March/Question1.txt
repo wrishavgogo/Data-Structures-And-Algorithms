@@ -1,0 +1,10 @@
+Question Link : https://leetcode.com/problems/insert-greatest-common-divisors-in-linked-list/?envType=company&envId=facebook&favoriteSlug=facebook-all 
+
+There is a given linkedlist , and 
+you have to insert a node in b/w two nodes which will have the value of gcd(node.val , node.next.val) 
+
+My experience : 
+
+Dude i forgot how to calculate gcd man . Havent done maths problem in so long oh no 
+
+For now am shamefully finding gcd by using dividing  by 1 to n and finding highest factor . I know i know , its cringe , but for now please excuse me 

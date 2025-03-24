@@ -1,0 +1,295 @@
+Keep in mind :- I did a blunder of when checking right subtree is heavier 
+I did balanceFactor < 1 , but instead it should be balanceFactor < -1 , which was messing up by correct soln
+
+class MyHashSet {
+
+    final int bucketSize = 777;
+    AVLTree[] buckets;
+
+    public MyHashSet() {
+        buckets = new AVLTree[bucketSize];
+    }
+
+    private int getHashIndex(int key) {
+        return key % bucketSize;
+    }
+
+    public void add(int key) {
+
+        int index = getHashIndex(key);
+        if(buckets[index] == null ) {
+            buckets[index] = new AVLTree(key);
+        } else {
+            buckets[index].addKey(key);
+        }
+
+    }
+
+    public void remove(int key) {
+        int index = getHashIndex(key);
+        if(buckets[index] != null ) {
+            buckets[index].removeKey(key);
+        }
+    }
+
+    public boolean contains(int key) {
+        int index = getHashIndex(key);
+        if(buckets[index] != null ) {
+            return buckets[index].searchKey(key);
+        }
+        return false;
+    }
+}
+
+class Node {
+    int val;
+    Node left;
+    Node right;
+    int height;
+
+    public Node(int val, Node left, Node right) {
+        this.val = val;
+        this.left = left;
+        this.right = right;
+        height = 1;
+    }
+}
+
+class AVLTree {
+
+    Node root;
+
+    public AVLTree(int val) {
+        // init avl tree with this as the root
+        root = new Node(val , null , null);
+    }
+
+    public boolean searchKey(int key) {
+        // normal BST search in tree
+        return search(key , root);
+    }
+
+    private boolean search(int key , Node node) {
+        
+        if(node == null ) {
+            // key not present
+            return false;
+        } else if(node.val > key ) {
+            // might be in leftsubtree
+            return search(key , node.left);
+        } else if(node.val < key ) {
+            // might be in rightsubtree
+            return search(key , node.right);
+        } 
+
+        // this is the node itself
+        return true;
+    }
+
+
+    public void addKey(int key) {
+        root = insert(key , root);
+    }
+
+    private Node insert(int key , Node node) {
+
+        if(node == null ) {
+            return new Node(key , null , null);
+        } else if(node.val >  key) {
+            node.left = insert(key , node.left);
+        } else if(node.val < key ) {
+            node.right = insert(key , node.right);
+        } else {
+            // no duplication insertion is allowed
+            return node;
+        }
+
+        node.height = 1 + Math.max(getHeight(node.left), getHeight(node.right));
+
+        int balanceFactor = getBalanceFactor(node);
+
+
+        // LL case
+        if(balanceFactor > 1 && node.left.val > key ) {
+            return rightRotate(node);
+        }
+        // LR case 
+        if(balanceFactor > 1 && node.left.val < key ) {
+            node.left = leftRotate(node.left);
+            // becomes LL
+            return rightRotate(node);
+        }
+        // RR case
+        if(balanceFactor < -1 && node.right.val < key ) {
+            return leftRotate(node);
+        }
+        // RL case
+        if(balanceFactor < -1 && node.right.val > key ) {
+            node.right = rightRotate(node.right);
+            return leftRotate(node);
+        }
+
+        return node;
+
+    }
+
+    public void removeKey(int key) {
+        root =  delete(key, root);
+    }
+
+    private Node delete(int key , Node node) {
+
+        if(node == null) {
+            return node;
+        } else if(node.val > key ) {
+            node.left = delete(key , node.left);
+        } else if(node.val < key ) {
+            node.right = delete(key , node.right);
+        } else {
+
+            // we reached the node we want to delete
+
+            // case 1 , either no children or 1 child only
+            if(node.left == null || node.right == null ) {
+
+                return node.left != null ? node.left : node.right;
+            }
+
+            // case 2 , it has both children 
+            node.val = findInorderSuccessorValue(node);
+            node.right = delete(node.val , node.right );
+        }
+
+        // same thing as insertion 
+
+        node.height = 1 + Math.max(getHeight(node.left) , getHeight(node.right));
+
+        
+        int balanceFactor = getBalanceFactor(node);
+
+        if(node.left == null && node.right == null && balanceFactor != 0) {
+            System.out.println("get balance");
+        }
+
+        // LL case
+        if(balanceFactor > 1 && getBalanceFactor(node.left) >= 0  ) {
+            return rightRotate(node);
+        }
+
+
+        // LR case
+        if(balanceFactor > 1 && getBalanceFactor(node.left) < 0  ) {
+            node.left = leftRotate(node.left);
+            return rightRotate(node);
+        }
+
+        // RR case
+        if(balanceFactor < -1 && getBalanceFactor(node.right) < 0  ) {
+            return leftRotate(node);
+        }
+
+        // RL case
+        if(balanceFactor < -1 && getBalanceFactor(node.right) >= 0  ) {
+            if(node.right == null && node.left == null) {
+                if(node.left != null ) {
+                    System.out.println(node.left.height);
+                }
+            }
+            node.right = rightRotate(node.right);
+            return leftRotate(node);
+        }
+
+        return node;
+    }
+
+    // trying to find the just next greater value of x.val
+    private int findInorderSuccessorValue(Node x) {
+
+        int val = x.val;
+        Node y = x.right;
+
+        while(y != null ) {
+            val = y.val;
+            y = y.left;
+        }
+
+        return val;
+    }
+
+
+    /**
+            right rotate function
+
+            x 
+           / \
+          y
+         / \
+            T    
+    * */
+    private Node rightRotate(Node x) {
+
+        Node y = x.left;
+        Node T = y.right;
+
+        // remapping
+        y.right = x;
+        x.left = T;
+
+        // height recalculation
+        x.height = 1 + Math.max(getHeight(x.left), getHeight(x.right));
+        y.height = 1 + Math.max(getHeight(y.left), getHeight(y.right));
+
+        return y;
+    }
+
+        /**
+            left rotate function
+
+            x 
+             \
+              y
+             / \
+            T    
+    * */
+    private Node leftRotate(Node x) {
+
+        Node y = x.right;
+        Node T = y.left;
+
+        // remapping
+        y.left = x;
+        x.right = T;
+
+        // height recalculation
+        x.height = 1 + Math.max(getHeight(x.left), getHeight(x.right));
+        y.height = 1 + Math.max(getHeight(y.left), getHeight(y.right));
+
+        return y;
+    }
+
+    private int getHeight(Node x) {
+
+        if(x == null ) {
+            return 0;
+        }
+
+        return x.height;
+    }
+
+    private int getBalanceFactor(Node x) {
+
+        if(x == null ) {
+            return 0;
+        }
+
+        return getHeight(x.left) - getHeight(x.right);
+    }   
+}
+
+/**
+ * Your MyHashSet object will be instantiated and called as such:
+ * MyHashSet obj = new MyHashSet();
+ * obj.add(key);
+ * obj.remove(key);
+ * boolean param_3 = obj.contains(key);
+ */

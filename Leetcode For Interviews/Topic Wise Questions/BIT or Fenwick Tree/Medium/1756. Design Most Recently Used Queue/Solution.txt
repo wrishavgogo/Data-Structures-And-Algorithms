@@ -1,0 +1,122 @@
+Code :- 
+
+class MRUQueue {
+
+    /**
+        Problem very similar to 
+        Link : https://leetcode.com/problems/queries-on-a-permutation-with-key/description/?envType=problem-list-v2&envId=binary-indexed-tree
+
+        there we were inserting in front of the queue 
+        here we are doing it at the end of the queue
+    */ 
+    class BitTree {
+
+        int n;
+        int[] tree;
+
+        public BitTree(int n) {
+            tree = new int[n + 1];
+            this.n = n;
+        }
+
+        public void update(int index , int val) {
+
+            // in update we have to update future indexes
+            while(index <= n ) {
+                tree[index] += val;
+                index += (index) & (-index);
+            }
+        }
+
+        // give me sum from 1 to index
+        public int sum(int index) {
+
+            int sum = 0;
+            while(index > 0 ) {
+                sum += tree[index];
+                index -= (index) & (-index);
+            }
+            return sum;
+        }
+    }
+
+    BitTree bitTree;
+    final int MAX_TIMES_FETCH_IS_CALLED = 2000;
+    Map<Integer , Integer> entryToLocationMap ;
+    Map<Integer , Integer> indexToEntryMap ;
+    int nextEntryPoint ;
+
+    public MRUQueue(int n) {
+        bitTree = new BitTree(n + MAX_TIMES_FETCH_IS_CALLED);
+        entryToLocationMap = new HashMap<>();
+        indexToEntryMap = new HashMap<>();
+
+        for(int i = 1 ; i <= n ; i ++ ) {
+            bitTree.update(i , 1);
+            entryToLocationMap.put(i , i );
+            indexToEntryMap.put(i , i );
+        }
+
+        // index 1 to n is occupied so next entry is 
+        nextEntryPoint = n + 1 ;
+
+        // init is done , now fetch has to do the rest 
+    }
+    
+    public int fetch(int k) {
+        
+        // find an index in the bit tree  sum(index) = k 
+        // we can use binary search to find it 
+
+        int position = -1;
+
+        // binary search 
+
+        int lo = 1 ; 
+        int hi = bitTree.n;
+        while(lo  <= hi ) {
+
+            int mid = (lo + hi) / 2;
+
+            // get prefix sum from 1 to mid
+            int val = bitTree.sum(mid);
+
+            if(val >= k) {
+                position = mid;
+                hi = mid - 1;
+            } else {
+                lo = mid + 1;
+            }
+        }
+
+
+        // found the index were 1 to index sum = k , so its the kth elememnt
+
+        int item = indexToEntryMap.get(position);
+
+        // we are removing kth element and pushing it to the end 
+        indexToEntryMap.remove(position);
+        entryToLocationMap.remove(item);
+        bitTree.update(position , -1);
+
+        // at the end we will insert this item
+        indexToEntryMap.put(nextEntryPoint , item);
+        entryToLocationMap.put(item , nextEntryPoint);
+        bitTree.update(nextEntryPoint , +1);
+
+
+        // new entry will enter in the next box
+        nextEntryPoint++;
+
+        
+
+
+        return item;
+    }
+}
+
+/**
+ * Your MRUQueue object will be instantiated and called as such:
+ * MRUQueue obj = new MRUQueue(n);
+ * int param_1 = obj.fetch(k);
+ */

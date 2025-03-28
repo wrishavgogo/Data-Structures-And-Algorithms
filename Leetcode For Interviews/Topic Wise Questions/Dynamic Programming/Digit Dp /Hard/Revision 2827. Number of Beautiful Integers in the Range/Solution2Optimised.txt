@@ -1,0 +1,160 @@
+Runtime 156 ms 
+
+Reducing a state and storing diff instead of odd , even count 
+
+ an optimisation which i can think of is 
+
+  MAX_LENGTH * TIGHT_SIZE * [MAX_ODD_DIGIT_SIZE + MAX_EVEN_DIGIT_SIZE ] * MODULO_SIZE * HAS_STARTED_SIZE
+
+  instead of storing odddigitCount and evendigitCount , why dont i just store the difference 
+  odddigitCount - evendigitCount 
+
+  the diff 
+
+  yes yes i understand your concern what if its going to go negative in the case at some point 
+   odddigitCount < evendigitCount 
+
+   in that case yes the diff will be < 0 , throwing index out of bounds exception 
+   we can do 10 + diff , in that case , just add a buffer so that it never goes to negative 
+
+
+   so we will alter the solution a bit 
+
+
+   /***
+
+   	new worst case complexity 
+
+   	[pos]*[tight]*[SAFE_BUFFER_SIZE + diff]*[modulo]*[hasNumberStarted]  
+
+   	runtime brought down to -> 156ms
+
+
+   */
+
+
+class Solution {
+
+    final static int MAX_LENGTH = 11;
+    final static int TIGHT_SIZE = 2;
+    final static int DIFF_SIZE = 10;
+    final static int MODULO_SIZE = 20;
+    final static int HAS_STARTED_SIZE = 2;
+    final static int SAFE_BUFFER_SIZE = 10;
+
+    int[][][][][] cache ;
+
+    public int numberOfBeautifulIntegers(int low, int high, int k) {
+        
+
+        cache = new int[MAX_LENGTH][TIGHT_SIZE][DIFF_SIZE + SAFE_BUFFER_SIZE]
+        [MODULO_SIZE][HAS_STARTED_SIZE];
+
+        invalidateCache();
+        int ansHigh = f(0 , 1 , 0 , 0 , 0 , String.valueOf(high) , k);
+        invalidateCache();
+        int ansLow  = f(0 , 1 , 0 , 0 , 0 , String.valueOf(low - 1) , k);
+
+        return ansHigh - ansLow;
+    }
+
+    void invalidateCache() {
+
+        for(int i = 0 ; i < MAX_LENGTH ; i ++ ) {
+            for(int j = 0 ; j < TIGHT_SIZE ; j ++ ) {
+                for(int k = 0 ; k < DIFF_SIZE + SAFE_BUFFER_SIZE ; k ++ ) {
+                    for(int l = 0 ; l < MODULO_SIZE ; l ++ ) {
+                        for(int m = 0 ; m < HAS_STARTED_SIZE ; m ++) {
+                            cache[i][j][k][l][m] = -1;
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+
+
+    int f(int pos , int tight , int diff, int modulo ,
+     int hasNumberStarted  , String nums , int k ) {
+
+        /**
+            diff is oddDigitCount - evenDigitCount 
+        * */
+
+        /**
+            we require the hasNumberStarted to ensure 
+            we dont count the leading 0's as evenDigitCount++
+         */
+
+        if(pos == nums.length()) {
+
+            // we are at the end do the required validations 
+            if(diff == 0 && hasNumberStarted == 1 && modulo == 0 ) {
+                // conditions given to us in the question
+                return 1;
+            } 
+            return 0;
+        }
+
+        if(cache[pos][tight][SAFE_BUFFER_SIZE + diff][modulo][hasNumberStarted] != -1 ) {
+            return cache[pos][tight][SAFE_BUFFER_SIZE + diff][modulo][hasNumberStarted];
+        }
+
+
+
+        int limit = (tight == 1 ) ? nums.charAt(pos) - '0' : 9;
+        int ans = 0;
+
+        for(int i = 0 ; i <= limit ; i ++ ) {
+
+           int newTight = (tight == 1 && i == limit ) ? 1 : 0;
+
+           if(hasNumberStarted == 0 && i == 0 ) {
+                // number not starting at this position
+                ans += f(pos + 1 , newTight , 0 , 0 , 0 , nums , k);
+           } else {
+                int n = nums.length();
+                int power = n - pos - 1 ;
+                // this step is i*10^(whichever position it is in ). we use modulo as we want to store that 
+                int newModulo = ((binaryExpo(10 , power , k ) * i)% k + modulo ) % k;
+                // number is starting or hadStartedEarlier only 
+                if(i % 2 == 0 ) {
+                    // even Digit 
+                    ans += f(pos + 1 , newTight , diff - 1 , newModulo , 1 , nums , k);
+                } else {
+                    // odd digit
+                    ans += f(pos + 1 , newTight ,  diff + 1 , newModulo , 1 , nums , k);
+                }
+           }
+        }
+        cache[pos][tight][SAFE_BUFFER_SIZE + diff][modulo][hasNumberStarted] = ans;
+        return ans;
+
+    }
+
+    // we have to raise a^b%mod 
+    int binaryExpo(int a , int b , int mod) {
+
+        if(a == 0 ) {
+            return 0; 
+        }
+
+        if(b == 0 ) {
+            return 1 % mod ;
+        }
+
+        if(b % 2 == 0 ) {
+            // b is even
+            int x = binaryExpo(a , b/2 , mod);
+            return (x*x) % mod;
+        } 
+
+        // b is odd
+
+        int x = a;
+        x =  (x *  binaryExpo(a , b - 1  , mod ))% mod;
+
+        return x;
+    }
+}

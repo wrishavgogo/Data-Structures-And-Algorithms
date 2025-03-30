@@ -1,0 +1,24 @@
+Noted in pdf how i came to this solution 
+
+
+class Solution {
+    public int maxScore(int[] nums) {
+        
+        int n = nums.length;
+        int[] ans = new int[n];
+
+        for(int i = 0 ; i < n ; i ++  ) {
+
+            int sum = 0;
+
+            for(int j = 0 ; j < i ; j ++ ) {
+                sum = Math.max(sum , ans[j] + (i - j)*nums[i]);
+            }
+            
+            ans[i] = sum;
+        }
+
+
+        return ans[n - 1];
+    }
+}

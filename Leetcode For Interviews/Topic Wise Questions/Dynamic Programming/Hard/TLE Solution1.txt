@@ -4,7 +4,7 @@ Will explain in the pdf why this one gave tle and why the other soln worked
 class Solution {
 
     int[][] directions = {{1 , -1 } , {1 , 0} , {1 , 1 }};
-    int[][][] cache = new int[70][70][70];
+    int[][][][] cache = new int[70][70][70][70];
 
     class PositionPair {
 
@@ -21,12 +21,12 @@ class Solution {
         for(int i = 0 ; i < 70 ; i ++) {
             for(int j = 0 ; j < 70 ; j ++ ) {
                 for(int k = 0 ; k < 70 ; k ++ ) {
-                    cache[i][j][k] = -1;
+                    for(int l = 0 ; l < 70 ; l ++ ) {
+                        cache[i][j][k][l] = -1;
+                    }
                 }
             }
         }
-
-        // i is the row number j is the col of robot1 and k is the col of robot2 
     }
 
     public int cherryPickup(int[][] grid) {
@@ -51,10 +51,8 @@ class Solution {
             return cherriesPickedByBothRobots(r1x , r1y , r2x , r2y , grid);
         }
 
-        // since r1x and r2x will be same at all instances we can have them in one state 
-
-        if(cache[r1x][r1y][r2y] != -1 ) {
-            return cache[r1x][r1y][r2y];
+        if(cache[r1x][r1y][r2x][r2y] != -1 ) {
+            return cache[r1x][r1y][r2x][r2y];
         }
 
         int currentCherriesPicked = cherriesPickedByBothRobots(r1x , r1y , r2x , r2y , grid);
@@ -99,7 +97,7 @@ class Solution {
         }
 
 
-        cache[r1x][r1y][r2y] = maxCherriesPicked;
+        cache[r1x][r1y][r2x][r2y] = maxCherriesPicked;
         
         return maxCherriesPicked;
 

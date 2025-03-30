@@ -1,0 +1,133 @@
+
+Will explain in the pdf why this one gave tle and why the other soln worked 
+
+class Solution {
+
+    int[][] directions = {{1 , -1 } , {1 , 0} , {1 , 1 }};
+    int[][][] cache = new int[70][70][70];
+
+    class PositionPair {
+
+        int x;
+        int y;
+        public PositionPair(int x , int y ) {
+            this.x = x;
+            this.y = y;
+        }
+    }
+
+    void invalidateCache() {
+
+        for(int i = 0 ; i < 70 ; i ++) {
+            for(int j = 0 ; j < 70 ; j ++ ) {
+                for(int k = 0 ; k < 70 ; k ++ ) {
+                    cache[i][j][k] = -1;
+                }
+            }
+        }
+
+        // i is the row number j is the col of robot1 and k is the col of robot2 
+    }
+
+    public int cherryPickup(int[][] grid) {
+        
+        int n = grid.length;
+        int m = grid[0].length;
+        invalidateCache();
+        return f(0 , 0 , 0 , m - 1 , grid );
+    }
+
+
+    /***
+        r1x -> robot1's row
+        r1y -> robot1's col
+        r2x -> robot2's row
+        r2y -> robot2's col
+    * */
+    int f(int r1x , int r1y , int r2x , int r2y , int[][] grid ) {
+
+        if(bothReachedAtLastRow(r1x , r1y , r2x , r2y , grid)) {
+            // no further cherry can be picked
+            return cherriesPickedByBothRobots(r1x , r1y , r2x , r2y , grid);
+        }
+
+        // since r1x and r2x will be same at all instances we can have them in one state 
+
+        if(cache[r1x][r1y][r2y] != -1 ) {
+            return cache[r1x][r1y][r2y];
+        }
+
+        int currentCherriesPicked = cherriesPickedByBothRobots(r1x , r1y , r2x , r2y , grid);
+        int maxCherriesPicked = currentCherriesPicked;
+
+
+        // 3 options for robot1 
+        // 3 options for robot2 
+        // when 3 * 3 = 9 options in total 
+        
+        List<PositionPair> positionsForRobot1 = new ArrayList<>();
+        List<PositionPair> positionsForRobot2 = new ArrayList<>();
+
+        for(int i = 0  ; i < directions.length ; i ++ ) {
+
+            int newR1x = r1x + directions[i][0];
+            int newR1y = r1y + directions[i][1];
+
+            if(!ifLocationInvalid(newR1x , newR1y , grid)) {
+                positionsForRobot1.add(new PositionPair(newR1x , newR1y));
+            }
+
+            int newR2x = r2x + directions[i][0];
+            int newR2y = r2y + directions[i][1];
+
+            if(!ifLocationInvalid(newR2x , newR2y , grid)) {
+                positionsForRobot2.add(new PositionPair(newR2x , newR2y));
+            }
+
+        }
+
+        for(int i = 0 ; i < positionsForRobot1.size() ; i ++ ) {
+            for(int j = 0 ; j < positionsForRobot2.size() ; j ++ ) {
+
+                int newR1x = positionsForRobot1.get(i).x;
+                int newR1y = positionsForRobot1.get(i).y;
+                int newR2x = positionsForRobot2.get(j).x;
+                int newR2y = positionsForRobot2.get(j).y;
+
+                maxCherriesPicked = Math.max(maxCherriesPicked , currentCherriesPicked + f(newR1x,newR1y,newR2x,newR2y,grid ));
+            }
+        }
+
+
+        cache[r1x][r1y][r2y] = maxCherriesPicked;
+        
+        return maxCherriesPicked;
+
+    }
+
+    private int cherriesPickedByBothRobots(int r1x , int r1y , int r2x , int r2y , int[][] grid  ) {
+
+        if(r1x == r2x && r1y == r2y ) {
+            return grid[r1x][r1y];
+        }
+
+        // its not the same cell
+
+        return grid[r1x][r1y] + grid[r2x][r2y];
+    }
+
+    private boolean ifLocationInvalid(int x , int y , int[][] grid  ) {
+
+        int n = grid.length;
+        int m = grid[0].length;
+
+        // outside grid bounds 
+        return x < 0 || x >= n || y < 0 || y >= m ;
+    }
+
+    private boolean bothReachedAtLastRow(int r1x , int r1y , int r2x , int r2y , int[][] grid ) {
+
+        int n = grid.length;
+        return r1x == n - 1  && r2x == n - 1  ;
+    }
+}

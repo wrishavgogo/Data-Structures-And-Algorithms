@@ -1,0 +1,59 @@
+class Solution {
+
+    final int mod = (int)(1e9 + 7);
+    final int MAX_N = (int)(1e3 + 1);
+    final int MAX_K = (int)(1e3 + 1);
+    int[][] cache = new int[MAX_N][MAX_K];
+
+    public int kInversePairs(int n, int k) {
+        
+        invalidateCache();
+        return f(n , k);
+    }
+
+    private void invalidateCache() {
+
+        for(int i = 0 ; i < MAX_N ; i ++  ) {
+            for(int j = 0 ; j < MAX_K ; j ++ ) {
+                cache[i][j] = -1;
+            }
+        }
+    }
+
+    int f(int n , int k ) {
+
+        if(k < 0 ) {
+            // never possible to return negative inverse pairs
+            return 0;
+        }
+
+        if(k == 0 ) {
+            // another base case if no inverse pair requried , then return sorted
+            return 1;
+        }
+
+        if(n == 1 ) {
+            // if elements is 1 in number you cannot add any inversion 
+            return k != 0 ? 0 : 1 ;
+        }
+
+        if(cache[n][k] != -1 ) {
+            return cache[n][k];
+        }
+
+        
+        int ans = 0;
+        for(int i = 1 ; i <= n ; i ++ ) {
+
+            // placing the ith element in the front 
+            // if ith element is in the front 
+            // number of inversions introduced because of it is i - 1 
+            ans += f(n - 1 , k - (i - 1) );
+            ans = ans % mod;
+        }
+
+        cache[n][k] = ans;
+        return ans;
+        
+    }
+}

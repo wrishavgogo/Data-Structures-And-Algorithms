@@ -1,0 +1,66 @@
+class Solution {
+
+    final int mod = (int)(1e9 + 7);
+    final int MAX_N = (int)(1e3 + 1);
+    final int MAX_K = (int)(1e3 + 1);
+    int[] prev ;
+    int[] curr ;
+
+    public int kInversePairs(int n, int k) {
+        
+        // iterative soln 
+        // fill the base cases
+        prev = new int[k + 1];
+        
+
+        // for dp[0][0] = 1
+        prev[0] = 1;
+
+        for(int i = 1 ; i <= k ; i ++  ) {
+            // constructing prefix array 
+            prev[i] += prev[i - 1];
+        }
+
+        for(int i = 1 ; i <= n  ; i ++ ) {
+
+            // initializing answer array for this ith row 
+            curr = new int[k + 1]; 
+            for(int j = 0 ; j <= k ; j ++ ) {
+                
+                /**
+                    Trying to find answer for
+                    for i number of elements 
+                    with j number of inversions
+                 */
+                if(j - i >= 0 ) {
+                    // element went from 0 to i elements 
+                    // j , j - 1 , j - 2 , ... , j - (i + 1 ) 
+                    // upto the above sum we need 
+                    // so prev[j] - prev[j - i] will give me that sum if prefix sum is stored there
+                    curr[j] = prev[j] - prev[j - i];
+                    curr[j] = curr[j] % mod;
+                } else {
+                    curr[j] = prev[j] ;
+                    curr[j] = curr[j] % mod;
+                }
+
+                if(j > 0 ) {
+                    // constructing prefix sum 
+                    curr[j] = ( curr[j] + curr[j - 1] )  % mod ;
+                }
+            }
+
+            // before moving to next row 
+            prev = curr;
+        }
+
+        int ans = prev[k] ;
+
+        if(k > 0 ) {
+            // since its storing prefix sum
+            ans = ( prev[k] - prev[k - 1] + mod ) % mod;
+        }
+        return ans;
+    }
+
+}

@@ -1,0 +1,51 @@
+class Solution {
+
+    final int mod = (int)(1e9 + 7);
+    final int MAX_N = (int)(1e3 + 1);
+    final int MAX_K = (int)(1e3 + 1);
+    int[] prev ;
+    int[] curr ;
+
+    public int kInversePairs(int n, int k) {
+        
+        // iterative soln 
+        // fill the base cases
+        prev = new int[k + 1];
+        
+
+        // for dp[0][0] = 1
+        prev[0] = 1;
+
+        for(int i = 1 ; i <= n  ; i ++ ) {
+
+            // initializing answer array for this ith row 
+            curr = new int[k + 1]; 
+            for(int j = 0 ; j <= k ; j ++ ) {
+                
+                /**
+                    Trying to find answer for
+                    for i number of elements 
+                    with j number of inversions
+                 */
+                for(int element = 1 ; element <= i ; element++ ) {
+                    
+                    // placement the element # at the front 
+                    // result in (element - 1 ) number of inversion
+                    // so remaining are k - (element - 1)
+                    if(j - element + 1 >= 0 ) {
+                        curr[j] += prev[j - element + 1 ];
+                        curr[j] = curr[j] % mod;
+                    }
+                }
+
+                
+
+            }
+
+            // before moving to next row 
+            prev = curr;
+        }
+        return prev[k];
+    }
+
+}

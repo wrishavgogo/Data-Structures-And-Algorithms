@@ -1,0 +1,99 @@
+class Solution {
+    Map<Integer , Integer> visited = new HashMap<>();
+    final int MAX_VAL = (int) (1e6 + 1);
+    int[][] directions = {{1 , 0} , {-1 , 0} , {0 , 1 } , {0 , -1}};
+    public int slidingPuzzle(int[][] board) {
+        
+        int posx = -1;
+        int posy = -1;
+
+        for(int i = 0 ; i < 2 ; i ++ ) {
+            for(int j = 0 ; j < 3 ; j ++ ) {
+
+                if(board[i][j] == 0 ) {
+                    posx = i;
+                    posy = j;
+                }
+            }
+        }
+
+        int requiredState = 123450;
+        return trySwap(board , requiredState , posx , posy );
+
+    }
+
+    int trySwap(int[][] board , int requiredState , int posx , int posy ) {
+        
+        int stateOfBoard = getState(board);
+        
+        if(requiredState == stateOfBoard ) {
+            return 1;
+        }
+
+        if(visited.getOrDefault(stateOfBoard , 0) == 1 ) {
+            // we already were in this state before return MAX VAL as this is not an option
+            return MAX_VAL;
+        }
+
+        // mark the current state of the board as visited 
+        visited.put(stateOfBoard , 1);
+
+        int ans = 0;
+
+        for(int i = 0 ; i < directions.length ; i ++  ) {
+
+            int newx = posx + directions[i][0];
+            int newy = posy + directions[i][1];
+
+            if(!isInvalidCell(newx , ,board)) {
+                swapCells(posx , posy , newx , newy , board);
+                ans = Math.max(ans , 1 + trySwap(board , requiredState , newx , newy));
+                // reverse swap the cells to try another combination
+                swapCells(newx , newy , posx , posy ,  board);
+            }
+
+        }
+
+
+        // mark the current state of the board as unvisited 
+        visited.put(stateOfBoard , 0);
+
+
+
+
+    }
+
+    void swapCells(int posx , int posy , int newx , int newy , int[][] board ) {
+
+        int temp = board[posx][posy];     
+        board[posx][posy] = board[newx][newy];
+        board[newx][newy] = temp;
+
+    }
+
+    boolean isInvalidCell(int x , int y , int[][] board) {
+
+        return x < 0 || x >= 2 || y < 0 || y >= 3;
+    }
+
+    int getState(int[][] board ) {
+
+        /**
+            state of board represented by string append of the order of the numbers
+            [1 , 2 , 3]
+            [4 , 5 , 0]
+
+            -> 123450
+        * */
+
+        int num = 0;
+
+        for(int i = 0 ; i < 2 ; i ++ ) {
+            for(int j = 0 ; j < 3 ; j ++ ) {
+                num = num * 10 + board[i][j];
+            }
+        }
+
+        return num;
+    }
+}

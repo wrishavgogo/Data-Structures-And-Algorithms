@@ -56,7 +56,7 @@ class Solution {
 
 
         // mark the current state of the board as unvisited 
-        visited.put(stateOfBoard , 0);
+        visited.put(stateOfBoard , 0);   ----> this part leading to infinite loops 
 
 
 

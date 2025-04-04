@@ -39,7 +39,7 @@ All the values of heights are unique.
 
 
 
-Soln : 
+Soln :   Explanation in the pdf 
 
 class Solution {
     public int[] canSeePersonsCount(int[] heights) {

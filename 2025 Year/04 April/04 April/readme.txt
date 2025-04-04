@@ -27,7 +27,7 @@ class Position {
 
   public boolean equals(Object o) {
     if(o == null ) return false;
-    if( ! o instance of Position) return false;
+    if( ! o instanceof Position) return false; -----> instanceof is a single keyword , not instance of ,, i did this mistake
     // directly compare values now 
     Position other = (Position) o --> we need to type case it to make the attribute calls
     return this.x == o.x && this.y == o.y;

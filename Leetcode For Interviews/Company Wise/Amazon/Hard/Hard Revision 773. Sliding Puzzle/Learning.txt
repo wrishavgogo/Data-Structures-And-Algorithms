@@ -1,0 +1,6 @@
+Only go for dfs when its acyclic , 
+
+for graph containing cycles go for bfs as it will have visited and will lead to the location much faster than dfs and plus in dfs there is chance of getting stuck in multiple
+cycles which we want to avoid , so use bfs for that .
+
+for cycles always go for bfs , and dfs for acyclic 

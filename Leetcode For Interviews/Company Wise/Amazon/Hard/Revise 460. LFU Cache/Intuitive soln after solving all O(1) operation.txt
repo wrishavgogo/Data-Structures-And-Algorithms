@@ -1,0 +1,157 @@
+
+Code : 
+
+class LFUCache {
+
+    class Node{
+
+        int freq;
+        Node prev;
+        Node next;
+        LinkedHashSet<Integer> lruKeys; // to utilize LRU
+
+        public Node(int freq) {
+            this.freq = freq;
+            lruKeys = new LinkedHashSet<Integer>();
+        }
+    }
+
+    Node head;
+    Node tail;
+    Map<Integer , Node> keyToNodeMap;
+    Map<Integer , Integer> keyToValueMap;
+    int capacity;
+
+    public LFUCache(int capacity) {
+        head = new Node(-1);
+        tail = new Node(-1);
+        head.next = tail;
+        tail.prev = head;
+        keyToNodeMap = new HashMap<>();
+        keyToValueMap = new HashMap<>();
+        this.capacity = capacity;
+    }
+
+    // in the DLL we are going to store in increasing order
+    // from left to right 
+    // head <-> minFreqNode <-> 2nd minimum ......... <-> maxFreqNode <-> Tail 
+    
+    public int get(int key) {
+        
+        if(!keyToValueMap.containsKey(key)) {
+            // key not present 
+            return -1;
+        }
+
+        int value = keyToValueMap.get(key);
+        // simulate reput using the old values 
+        put(key , value);
+        return value;
+    }
+    
+    public void put(int key, int value) {
+        
+        // key already exists
+        if(keyToValueMap.containsKey(key)) {
+
+            // new value assigned
+            keyToValueMap.put(key , value);
+            
+            Node node = keyToNodeMap.get(key);
+            keyToNodeMap.remove(key);
+
+            int prevFreq = node.freq;
+            node.lruKeys.remove(key);
+
+            int newFreq = prevFreq + 1;
+
+            if(node.next.freq == newFreq ) {
+                node.next.lruKeys.add(key);
+                keyToNodeMap.put(key , node.next);
+            } else {
+                Node newNode = new Node(newFreq);
+                newNode.lruKeys.add(key);
+                keyToNodeMap.put(key , newNode);
+                insertNode(node , node.next , newNode);
+            }
+
+            if(node.lruKeys.size() == 0 ) {
+                removeNode(node);
+            }
+
+        }  else {
+            // key does not exist 
+            if(capacity == keyToValueMap.size()) {
+                // cache is full , eviction needs to be done 
+                evict();
+            }
+            
+            if(head.next.freq != 1 || head.next == tail) {
+                // minFreq != 1 
+                // or maybe capacity == 1 and evict removed the 1 node then also newNode has to be created
+
+                Node newNode = new Node(1);
+                newNode.lruKeys.add(key);
+                keyToNodeMap.put(key , newNode);
+                keyToValueMap.put(key , value);  
+                insertNode(head , head.next , newNode);
+            } else {
+                Node node = head.next;
+                node.lruKeys.add(key);
+                keyToNodeMap.put(key , node);
+                keyToValueMap.put(key , value);  
+            }
+
+        }
+    }
+
+    public void evict() {
+
+        if(head.next == tail ) {
+            return;
+        }
+
+        Node minNode = head.next;
+        int keyToEvict = minNode.lruKeys.iterator().next();
+
+        // remove the key from the maps
+        keyToNodeMap.remove(keyToEvict);
+        keyToValueMap.remove(keyToEvict);
+
+        // remove key from the lru cache of the node
+        minNode.lruKeys.remove(keyToEvict);
+        if(minNode.lruKeys.size() == 0 ) {
+            removeNode(minNode);
+        }
+
+    }
+
+    public void insertNode(Node firstNode , Node secondNode , Node toBeInsertedNode) {
+
+        firstNode.next = toBeInsertedNode;
+        secondNode.prev = toBeInsertedNode;
+
+        toBeInsertedNode.prev = firstNode;
+        toBeInsertedNode.next = secondNode;
+    }
+
+    public void removeNode(Node node) {
+
+        Node prevNode = node.prev;
+        Node nextNode = node.next;
+
+        node.prev = null;
+        node.next = null;
+
+        prevNode.next = nextNode;
+        nextNode.prev = prevNode;
+    }
+}
+
+/**
+ * Your LFUCache object will be instantiated and called as such:
+ * LFUCache obj = new LFUCache(capacity);
+ * int param_1 = obj.get(key);
+ * obj.put(key,value);
+ */
+ 

@@ -1,0 +1,156 @@
+Code : 
+
+class RandomizedCollection {
+
+    class Node {
+
+        // keys with the same frequency end up in the same node
+        int freq;
+        Node prev;
+        Node next;
+        HashSet<Integer> keys;
+
+        public Node(int freq) {
+            this.freq = freq;
+            keys = new HashSet<>();
+        }
+    }
+
+    Map<Integer , Node> keyToNodeMap;
+    Node head;
+    Node tail;
+
+    public RandomizedCollection() {
+        head = new Node(-1);
+        tail = new Node(-1);
+        head.next = tail;
+        tail.prev = head;
+        keyToNodeMap = new HashMap<>();
+    }
+    
+    public boolean insert(int val) {
+        
+        boolean returnvalue = true;
+
+        if(keyToNodeMap.containsKey(val)) {
+            returnvalue = false;
+            Node node = keyToNodeMap.get(val);
+
+            node.keys.remove(val);
+            keyToNodeMap.remove(val);
+
+            int freq = node.freq;
+            int newFreq = freq + 1;
+
+            if(node.next.freq == newFreq) {
+                // new freq node exits
+                node.next.keys.add(val);
+                keyToNodeMap.put(val , node.next);
+            } else {
+                Node newNode = new Node(newFreq);
+                newNode.keys.add(val);
+                keyToNodeMap.put(val , newNode);
+                insertNode(node , node.next , newNode);
+            }
+
+            if(node.keys.size() == 0 ) {
+                removeNode(node);
+            }
+
+        } else {
+            // key is newly getting added 
+            // node with frequency 1 exists 
+            if(head.next.freq == 1 ) {
+                Node node = head.next;
+                node.keys.add(val);
+                keyToNodeMap.put(val , node);
+            } else {
+                Node newNode = new Node(1);
+                newNode.keys.add(val);
+                keyToNodeMap.put(val , newNode);
+                insertNode(head , head.next , newNode);
+            }
+                  
+        }
+
+
+
+        return returnvalue;
+    }
+    
+    public boolean remove(int val) {
+        
+        if(!keyToNodeMap.containsKey(val)) {
+            return false;
+        }
+
+        Node node = keyToNodeMap.get(val);
+        node.keys.remove(val);
+        int freq = node.freq;
+        keyToNodeMap.remove(val);
+        int newFreq = freq - 1 ;
+
+        if(newFreq != 0 ) {
+
+            if(node.prev.freq == newFreq) {
+                // node with newFreq exists
+                node.prev.keys.add(val);
+                keyToNodeMap.put(val , node.prev);
+            } else {
+                // node has to be created with newfREQ 
+                Node newNode = new Node(newFreq);
+                keyToNodeMap.put(val , newNode);
+                newNode.keys.add(val);
+                insertNode(node.prev , node , newNode);
+            }
+
+        }
+
+
+        if(node.keys.size() == 0 ) {
+            removeNode(node);
+        }
+
+
+
+        return true;
+    }
+
+    public void insertNode(Node node1 , Node node2 , Node node) {
+
+        node.next = node2;
+        node.prev = node1;
+
+        node1.next = node;
+        node2.prev = node;
+
+    }
+
+    public void removeNode(Node node) {
+
+        Node prevNode = node.prev;
+        Node nextNode = node.next;
+
+        node.prev = null;
+        node.next = null;
+
+        prevNode.next = nextNode;
+        nextNode.prev = prevNode;
+    }
+     
+    public int getRandom() {
+        
+        // The test cases are generated such that getRandom will only be called if there is at least one item in the RandomizedCollection.
+
+        // element with max frequency will have highest probability to get printed
+        return tail.prev.keys.iterator().next();
+    }
+}
+
+/**
+ * Your RandomizedCollection object will be instantiated and called as such:
+ * RandomizedCollection obj = new RandomizedCollection();
+ * boolean param_1 = obj.insert(val);
+ * boolean param_2 = obj.remove(val);
+ * int param_3 = obj.getRandom();
+ */

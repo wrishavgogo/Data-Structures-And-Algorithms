@@ -1,0 +1,159 @@
+cODE : 
+
+class RandomizedCollection {
+
+    int i = -1;
+    List<Integer> valList;
+    Map<Integer , HashSet<Integer>> valToPositionSetMap;
+
+    public RandomizedCollection() {
+        i = 0;
+        valList = new ArrayList<>();
+        valToPositionSetMap = new HashMap<>();
+    }
+
+    public void outputArray() {
+
+        for(int i = 0 ; i < valList.size() ; i ++ ) {
+            System.out.print(valList.get(i) + " ");
+        }
+        System.out.println();
+
+        for(Map.Entry<Integer , HashSet<Integer>> entry : valToPositionSetMap.entrySet()) {
+
+            int key = entry.getKey();
+            HashSet<Integer> st = entry.getValue();
+
+            System.out.print(key + " ---->");
+
+            Iterator it = st.iterator();
+            while(it.hasNext()) {
+               System.out.print(it.next()); 
+            }
+
+        }
+
+        System.out.println();
+    }
+    
+    public boolean insert(int val) {
+        
+        boolean notPresent =  true;
+        if(valToPositionSetMap.containsKey(val)) {
+            notPresent = false;
+        }
+        valList.add(val);
+        valToPositionSetMap.computeIfAbsent(val , (Integer key) -> new HashSet<>());
+        valToPositionSetMap.get(val).add(valList.size() - 1); // point of insertion
+        //outputArray();
+        // simple insertion 
+        // removal has some logic to handle
+        return notPresent;
+
+    }
+    
+    public boolean remove(int val) {
+
+        if(!valToPositionSetMap.containsKey(val)) {
+            return false;
+        }
+        
+        int positionOfVal = valToPositionSetMap.get(val).iterator().next();
+        //System.out.println("remove call" + " " + val + " " + positionOfVal);
+        if(positionOfVal == valList.size() - 1 ) {
+            // if val to be removed is the element at the end 
+            // simple removal of the last element 
+            valToPositionSetMap.get(val).remove(positionOfVal);
+            if(valToPositionSetMap.get(val).size() == 0 ) {
+                valToPositionSetMap.remove(val);
+            }
+        } else {
+            //System.out.println("swapp caller");
+            // val to be removed is not at the end and some other index 
+            // step1 -> get the element currently at the end 
+            // step2 -> val at positionOfVal and endElement at end 
+            // intuition -> since we cannot remove valList.remove(positionOfVal) in O(1)
+            // step3 -> so we swap endElement and val , now arr[positionOfVal] = endElement 
+            // and update that in the stack map as well , simple pop and push positionOfVal
+            // and now arr[endElement] = val
+            // now its a simple case of removing val from the last element 
+
+            // step1 
+            int endElement = valList.get(valList.size() - 1);
+
+            // step3
+            swap(positionOfVal , valList.size() - 1);
+
+            // remove endelement position changed so ...
+            valToPositionSetMap.get(endElement).remove(valList.size() - 1);
+            valToPositionSetMap.get(val).remove(positionOfVal);
+
+            // update endElement's position
+            valToPositionSetMap.get(endElement).add(positionOfVal);
+            if(valToPositionSetMap.get(val).size() == 0 ) {
+                valToPositionSetMap.remove(val);
+            }
+        }
+
+
+        // at this point array size reduces by 1  last element to be removed O(1) operation
+        valList.remove(valList.size() - 1);
+        
+        remapCurrentPointer();
+
+        //outputArray();
+        return true;
+    }
+
+    public void swap(int index1, int index2) {
+
+        int n = valList.size();
+
+        if(index1 >= n || index2 >= n) {
+            return ;
+        }
+
+
+
+        int temp1 = valList.get(index1);
+        int temp2 = valList.get(index2);
+        // System.out.println("swap call");
+        // System.out.println(temp1 + " " + temp2);
+        valList.set(index1 , temp2);
+        valList.set(index2 , temp1);
+
+
+        temp1 = valList.get(index1);
+        temp2 = valList.get(index2);
+
+       // System.out.println(temp1 + " " + temp2);
+    }
+
+    public void remapCurrentPointer() {
+
+        int n = valList.size();
+
+        if(n == 0 ) {
+            // no element in the datastructure
+            i = 0;
+            return ;
+        }
+        i = i % n;
+    }
+    
+    public int getRandom() {
+        
+        int val = valList.get(i);
+        int n = valList.size();
+        i = (i + 1) % n; // to ensure circle and all elements get a fair chance
+        return val;
+    }
+}
+
+/**
+ * Your RandomizedCollection object will be instantiated and called as such:
+ * RandomizedCollection obj = new RandomizedCollection();
+ * boolean param_1 = obj.insert(val);
+ * boolean param_2 = obj.remove(val);
+ * int param_3 = obj.getRandom();
+ */

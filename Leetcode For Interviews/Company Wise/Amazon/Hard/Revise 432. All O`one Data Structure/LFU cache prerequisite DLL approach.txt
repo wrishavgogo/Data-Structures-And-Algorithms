@@ -1,0 +1,126 @@
+read explanation.pdf
+
+class AllOne {
+
+
+    // this is same as LFU cache problem 
+    // glad i learnt about LinkedHashSet
+
+    Map<String , Integer> keyToFrequencyMap;
+    Map<Integer , HashSet<String>> freqToSetMap;
+    int minFreq;
+    int maxFreq;
+
+    public AllOne() {
+        keyToFrequencyMap = new HashMap<>();
+        freqToSetMap = new HashMap<>();
+        minFreq = 0;
+        maxFreq = 0;
+    }
+    
+    public void inc(String key) {
+        
+        // case 1 key exists 
+        if(keyToFrequencyMap.containsKey(key)) {
+
+            int freq = keyToFrequencyMap.get(key);
+            freqToSetMap.get(freq).remove(key);
+
+            if(freqToSetMap.get(freq).size() == 0 ) {
+                // no key for that freq
+                freqToSetMap.remove(freq);
+            }
+
+            // increment the new frequency
+            int newFreq = freq + 1;
+            keyToFrequencyMap.put(key , newFreq);
+            freqToSetMap.computeIfAbsent(newFreq , (Integer k ) -> new HashSet<>());
+            freqToSetMap.get(newFreq).add(key);
+
+            if(newFreq > maxFreq ) {
+                maxFreq++;
+            }
+        } else {
+            // case where key is not present 
+            minFreq = 1;
+            keyToFrequencyMap.put(key , minFreq);
+            freqToSetMap.computeIfAbsent(minFreq , (Integer k) -> new HashSet<>());
+            freqToSetMap.get(minFreq).add(key);
+        }
+
+
+        // readjust min and maxFreq
+
+        if(!freqToSetMap.containsKey(minFreq)) {
+                minFreq++;
+        }
+
+        
+    }
+    
+    public void dec(String key) {
+        
+        //  It is guaranteed that key exists in the data structure before the decrement.
+
+        int freq = keyToFrequencyMap.get(key);
+        freqToSetMap.get(freq).remove(key);
+
+        if(freqToSetMap.get(freq).size() == 0 ) {
+            freqToSetMap.remove(freq);
+        }
+
+        // reduce the frequency
+        int newFreq = freq - 1;
+        if(newFreq == 0 ) {
+            // frequency of the key became zero
+            keyToFrequencyMap.remove(key);
+        } else {
+            keyToFrequencyMap.put(key , newFreq);
+            freqToSetMap.computeIfAbsent(newFreq , (Integer k ) -> new HashSet<>());
+            freqToSetMap.get(newFreq).add(key);
+
+            if(minFreq > newFreq) {
+                minFreq = newFreq;
+            }
+        }
+
+        
+
+        if(!freqToSetMap.containsKey(maxFreq)) {
+            // key had maxFreq and it was only key in the set of maxfREQ
+            // frequency is going to decrease only
+            maxFreq--;
+        }
+    }
+    
+    public String getMaxKey() {
+        
+
+        if(keyToFrequencyMap.size() == 0 ) {
+            // no element exists
+            return "";
+        }
+
+        return freqToSetMap.get(maxFreq).iterator().next();
+    }
+    
+    public String getMinKey() {
+
+        if(keyToFrequencyMap.size() == 0 ) {
+            // no element exists
+            return "";
+        }
+
+        return freqToSetMap.get(minFreq).iterator().next();
+        
+    }
+}
+
+/**
+ * Your AllOne object will be instantiated and called as such:
+ * AllOne obj = new AllOne();
+ * obj.inc(key);
+ * obj.dec(key);
+ * String param_3 = obj.getMaxKey();
+ * String param_4 = obj.getMinKey();
+ */

@@ -46,3 +46,57 @@ Soln :
 Target is O(1) push and pop , read the explanation pdf , to understand the wonderful explanation 
 and how beautifully human brain works 
 
+
+class FreqStack {
+
+    Map<Integer , Integer> valToFrequencyMap;
+    Map<Integer , Stack<Integer>> bucketToInsertedNodesMap;
+    int maxFreq;
+
+    public FreqStack() {
+        valToFrequencyMap = new HashMap<>();
+        bucketToInsertedNodesMap = new HashMap<>();
+        maxFreq = 0;
+    }
+    
+    public void push(int val) {
+        
+        valToFrequencyMap.put(val , valToFrequencyMap.getOrDefault(val , 0) + 1);
+        int freq = valToFrequencyMap.get(val);
+
+        // push this val into the bucket of new freq
+        bucketToInsertedNodesMap.computeIfAbsent(freq , (Integer key) -> new Stack<>());
+        bucketToInsertedNodesMap.get(freq).push(val);
+
+        if(freq > maxFreq) {
+            maxFreq = freq;
+        }
+    }
+    
+    public int pop() {
+        
+        // we will pop the maxFreq's top node
+
+        int val = bucketToInsertedNodesMap.get(maxFreq).pop();
+        valToFrequencyMap.put(val , valToFrequencyMap.getOrDefault(val , 1) - 1);
+
+        if(valToFrequencyMap.get(val) == 0 ) {
+            valToFrequencyMap.remove(val);
+        }
+        
+        if(bucketToInsertedNodesMap.get(maxFreq).size() == 0 ) {
+            bucketToInsertedNodesMap.remove(maxFreq);
+            maxFreq--; // the maxFreq-1 th node of val will be in the previous bucket
+        }
+
+        return val;
+    }
+}
+
+/**
+ * Your FreqStack object will be instantiated and called as such:
+ * FreqStack obj = new FreqStack();
+ * obj.push(val);
+ * int param_2 = obj.pop();
+ */
+

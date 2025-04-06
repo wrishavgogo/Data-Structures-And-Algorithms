@@ -1,118 +1,149 @@
-read explanation.pdf
-
+read the explanation.pdf
 class AllOne {
 
+    // same doubly linKEDlIST IMPLementation as lfu cache 
+    // that is the more intuitive approach to solve lfu
 
-    // this is same as LFU cache problem 
-    // glad i learnt about LinkedHashSet
+    class Node {
 
-    Map<String , Integer> keyToFrequencyMap;
-    Map<Integer , HashSet<String>> freqToSetMap;
-    int minFreq;
-    int maxFreq;
+        int freq;
+        Node prev;
+        Node next;
+        HashSet<String> keys; // normal hashSet works any key we can return 
+
+        public Node(int freq) {
+            this.freq = freq;
+            keys = new HashSet<String>();
+        }
+
+    }
+
+    Node head = null;
+    Node tail = null;
+    Map<String , Node> keyToNodeMap;
 
     public AllOne() {
-        keyToFrequencyMap = new HashMap<>();
-        freqToSetMap = new HashMap<>();
-        minFreq = 0;
-        maxFreq = 0;
+        head = new Node(-1);
+        tail = new Node(-1);
+        head.next = tail;
+        tail.prev = head;
+        keyToNodeMap = new HashMap<>();
     }
     
     public void inc(String key) {
         
-        // case 1 key exists 
-        if(keyToFrequencyMap.containsKey(key)) {
+        if(keyToNodeMap.containsKey(key)) {
+            // node already present
+            Node node = keyToNodeMap.get(key);
+            keyToNodeMap.remove(key);
+            int freq = node.freq;
+            node.keys.remove(key);
 
-            int freq = keyToFrequencyMap.get(key);
-            freqToSetMap.get(freq).remove(key);
-
-            if(freqToSetMap.get(freq).size() == 0 ) {
-                // no key for that freq
-                freqToSetMap.remove(freq);
-            }
-
-            // increment the new frequency
             int newFreq = freq + 1;
-            keyToFrequencyMap.put(key , newFreq);
-            freqToSetMap.computeIfAbsent(newFreq , (Integer k ) -> new HashSet<>());
-            freqToSetMap.get(newFreq).add(key);
 
-            if(newFreq > maxFreq ) {
-                maxFreq++;
+            if(node.next.freq == newFreq ) {
+                node.next.keys.add(key);
+                keyToNodeMap.put(key , node.next);
+            } else {
+                Node newNode = new Node(newFreq);
+                newNode.keys.add(key);
+                keyToNodeMap.put(key , newNode);
+                insertNode(node , node.next , newNode);
             }
+
+            if(node.keys.size() == 0 ) {
+                removeNode(node);
+            }
+
         } else {
-            // case where key is not present 
-            minFreq = 1;
-            keyToFrequencyMap.put(key , minFreq);
-            freqToSetMap.computeIfAbsent(minFreq , (Integer k) -> new HashSet<>());
-            freqToSetMap.get(minFreq).add(key);
+            // newly getting added for freq = 1 
+
+            if(head.next.freq != 1 || head.next == tail ) {
+                // either minimum freq != 1 
+                // or no element is inserted yet ,this is first element inserted in empty stack
+                Node newNode = new Node(1);
+                newNode.keys.add(key);
+                keyToNodeMap.put(key , newNode);
+                insertNode(head , head.next , newNode);
+                
+            } else {
+                Node node = head.next;
+                node.keys.add(key);
+                keyToNodeMap.put(key , node);
+            }
+            
         }
-
-
-        // readjust min and maxFreq
-
-        if(!freqToSetMap.containsKey(minFreq)) {
-                minFreq++;
-        }
-
-        
     }
     
     public void dec(String key) {
         
-        //  It is guaranteed that key exists in the data structure before the decrement.
+        // given in the question It is guaranteed that key exists in the data structure before the decrement.
 
-        int freq = keyToFrequencyMap.get(key);
-        freqToSetMap.get(freq).remove(key);
+        Node node = keyToNodeMap.get(key);
+        int freq = node.freq;
 
-        if(freqToSetMap.get(freq).size() == 0 ) {
-            freqToSetMap.remove(freq);
-        }
+        node.keys.remove(key);
+        keyToNodeMap.remove(key);
 
-        // reduce the frequency
         int newFreq = freq - 1;
-        if(newFreq == 0 ) {
-            // frequency of the key became zero
-            keyToFrequencyMap.remove(key);
-        } else {
-            keyToFrequencyMap.put(key , newFreq);
-            freqToSetMap.computeIfAbsent(newFreq , (Integer k ) -> new HashSet<>());
-            freqToSetMap.get(newFreq).add(key);
 
-            if(minFreq > newFreq) {
-                minFreq = newFreq;
+        if(newFreq > 0 ) {
+
+            if(node.prev.freq == newFreq) {
+                node.prev.keys.add(key);
+                keyToNodeMap.put(key , node.prev);
+            } else {
+                Node newNode = new Node(newFreq);
+                newNode.keys.add(key);
+                keyToNodeMap.put(key , newNode);
+                insertNode(node.prev , node , newNode );
             }
         }
-
         
 
-        if(!freqToSetMap.containsKey(maxFreq)) {
-            // key had maxFreq and it was only key in the set of maxfREQ
-            // frequency is going to decrease only
-            maxFreq--;
+        if(node.keys.size() == 0 ) {
+            removeNode(node);
         }
+    }
+
+    public void insertNode(Node node1 , Node node2 , Node node ) {
+
+        node.prev = node1;
+        node.next = node2;
+
+        node1.next = node;
+        node2.prev = node;
+    }
+
+    public void removeNode(Node node) {
+
+        Node prevNode = node.prev;
+        Node nextNode = node.next;
+
+        node.next = null;
+        node.prev = null;
+
+        prevNode.next = nextNode;
+        nextNode.prev = prevNode;
     }
     
     public String getMaxKey() {
         
-
-        if(keyToFrequencyMap.size() == 0 ) {
-            // no element exists
+        if(head.next == tail) {
+            // no entry
             return "";
         }
 
-        return freqToSetMap.get(maxFreq).iterator().next();
+        return tail.prev.keys.iterator().next();
     }
     
     public String getMinKey() {
-
-        if(keyToFrequencyMap.size() == 0 ) {
-            // no element exists
+        
+        if(head.next == tail) {
+            // no entry
             return "";
         }
-
-        return freqToSetMap.get(minFreq).iterator().next();
-        
+        return head.next.keys.iterator().next();
     }
 }
 

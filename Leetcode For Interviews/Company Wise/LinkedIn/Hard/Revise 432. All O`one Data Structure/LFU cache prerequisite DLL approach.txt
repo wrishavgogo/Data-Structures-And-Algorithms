@@ -1,0 +1,157 @@
+read the explanation.pdf
+class AllOne {
+
+    // same doubly linKEDlIST IMPLementation as lfu cache 
+    // that is the more intuitive approach to solve lfu
+
+    class Node {
+
+        int freq;
+        Node prev;
+        Node next;
+        HashSet<String> keys; // normal hashSet works any key we can return 
+
+        public Node(int freq) {
+            this.freq = freq;
+            keys = new HashSet<String>();
+        }
+
+    }
+
+    Node head = null;
+    Node tail = null;
+    Map<String , Node> keyToNodeMap;
+
+    public AllOne() {
+        head = new Node(-1);
+        tail = new Node(-1);
+        head.next = tail;
+        tail.prev = head;
+        keyToNodeMap = new HashMap<>();
+    }
+    
+    public void inc(String key) {
+        
+        if(keyToNodeMap.containsKey(key)) {
+            // node already present
+            Node node = keyToNodeMap.get(key);
+            keyToNodeMap.remove(key);
+            int freq = node.freq;
+            node.keys.remove(key);
+
+            int newFreq = freq + 1;
+
+            if(node.next.freq == newFreq ) {
+                node.next.keys.add(key);
+                keyToNodeMap.put(key , node.next);
+            } else {
+                Node newNode = new Node(newFreq);
+                newNode.keys.add(key);
+                keyToNodeMap.put(key , newNode);
+                insertNode(node , node.next , newNode);
+            }
+
+            if(node.keys.size() == 0 ) {
+                removeNode(node);
+            }
+
+        } else {
+            // newly getting added for freq = 1 
+
+            if(head.next.freq != 1 || head.next == tail ) {
+                // either minimum freq != 1 
+                // or no element is inserted yet ,this is first element inserted in empty stack
+                Node newNode = new Node(1);
+                newNode.keys.add(key);
+                keyToNodeMap.put(key , newNode);
+                insertNode(head , head.next , newNode);
+                
+            } else {
+                Node node = head.next;
+                node.keys.add(key);
+                keyToNodeMap.put(key , node);
+            }
+            
+        }
+    }
+    
+    public void dec(String key) {
+        
+        // given in the question It is guaranteed that key exists in the data structure before the decrement.
+
+        Node node = keyToNodeMap.get(key);
+        int freq = node.freq;
+
+        node.keys.remove(key);
+        keyToNodeMap.remove(key);
+
+        int newFreq = freq - 1;
+
+        if(newFreq > 0 ) {
+
+            if(node.prev.freq == newFreq) {
+                node.prev.keys.add(key);
+                keyToNodeMap.put(key , node.prev);
+            } else {
+                Node newNode = new Node(newFreq);
+                newNode.keys.add(key);
+                keyToNodeMap.put(key , newNode);
+                insertNode(node.prev , node , newNode );
+            }
+        }
+        
+
+        if(node.keys.size() == 0 ) {
+            removeNode(node);
+        }
+    }
+
+    public void insertNode(Node node1 , Node node2 , Node node ) {
+
+        node.prev = node1;
+        node.next = node2;
+
+        node1.next = node;
+        node2.prev = node;
+    }
+
+    public void removeNode(Node node) {
+
+        Node prevNode = node.prev;
+        Node nextNode = node.next;
+
+        node.next = null;
+        node.prev = null;
+
+        prevNode.next = nextNode;
+        nextNode.prev = prevNode;
+    }
+    
+    public String getMaxKey() {
+        
+        if(head.next == tail) {
+            // no entry
+            return "";
+        }
+
+        return tail.prev.keys.iterator().next();
+    }
+    
+    public String getMinKey() {
+        
+        if(head.next == tail) {
+            // no entry
+            return "";
+        }
+        return head.next.keys.iterator().next();
+    }
+}
+
+/**
+ * Your AllOne object will be instantiated and called as such:
+ * AllOne obj = new AllOne();
+ * obj.inc(key);
+ * obj.dec(key);
+ * String param_3 = obj.getMaxKey();
+ * String param_4 = obj.getMinKey();
+ */

@@ -1,0 +1,113 @@
+Code : 
+
+
+
+class LFUCache {
+
+    class Node {
+        int key;
+        int value;
+        int freq;
+
+        public Node(int key , int value ) {
+            this.key = key;
+            this.value = value;
+            freq = 1;
+        }
+    }
+
+    Map<Integer , Node> keyToNodeMap;
+    Map<Integer , LinkedHashSet<Integer>> freqToLruCacheMap;
+    int capacity;
+    int minFreq;
+
+    public LFUCache(int capacity) {
+        this.capacity = capacity;
+        keyToNodeMap = new HashMap<>();
+        freqToLruCacheMap = new HashMap<>();
+        minFreq = -1;
+    }
+    
+    public int get(int key) {
+        
+        if(!keyToNodeMap.containsKey(key)) {
+            // key not found
+            return -1;
+        }
+
+        Node node = keyToNodeMap.get(key);
+        int val = node.value;
+
+        // simulate a reput of this node
+        // automatically frequency will be increased
+        put(key , val);
+
+        return val;
+    }
+    
+    public void put(int key, int value) {
+        
+        // case 1 key already exists
+        if(keyToNodeMap.containsKey(key)) {
+
+            // get freq , get the lru set 
+            // remove key from that lru
+            int freq = keyToNodeMap.get(key).freq;
+            freqToLruCacheMap.get(freq).remove(key);
+
+            // frequency increases by 1 
+            // update the value
+            int newFreq = freq + 1;
+            keyToNodeMap.get(key).freq = newFreq;
+            keyToNodeMap.get(key).value = value;
+            freqToLruCacheMap.computeIfAbsent(newFreq ,(Integer k) -> new LinkedHashSet<Integer>());
+
+            // push key to new frequency lru set 
+            freqToLruCacheMap.get(newFreq).add(key);
+
+            if(freqToLruCacheMap.get(freq).size() == 0 ) {
+                freqToLruCacheMap.remove(freq);
+
+                if(minFreq == freq) {
+                    minFreq = newFreq;
+                }
+            }
+
+            return ;       
+            
+        }
+
+        // if key is completely new 
+
+        if(capacity == keyToNodeMap.size()) {
+
+            // evict lfu key 
+
+            int keyToEvict = freqToLruCacheMap.get(minFreq).iterator().next();
+            keyToNodeMap.remove(keyToEvict);
+            freqToLruCacheMap.get(minFreq).remove(keyToEvict);
+
+            if(freqToLruCacheMap.get(minFreq).size() == 0 ) {
+                freqToLruCacheMap.remove(minFreq);
+            }
+        } 
+
+
+        minFreq = 1;
+        Node node = new Node(key , value);
+        keyToNodeMap.put(key , node);
+        freqToLruCacheMap.computeIfAbsent(minFreq ,(Integer k) -> new LinkedHashSet<Integer>());
+        freqToLruCacheMap.get(minFreq).add(key);
+
+    }
+
+    
+
+}
+
+/**
+ * Your LFUCache object will be instantiated and called as such:
+ * LFUCache obj = new LFUCache(capacity);
+ * int param_1 = obj.get(key);
+ * obj.put(key,value);
+ */

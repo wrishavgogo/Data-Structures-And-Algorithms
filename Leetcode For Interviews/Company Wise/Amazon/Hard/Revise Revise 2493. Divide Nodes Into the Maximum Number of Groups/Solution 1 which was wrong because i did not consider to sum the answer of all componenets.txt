@@ -1,0 +1,113 @@
+I considered only to add max from all the componenets but in reality it is to add max of each component 
+
+class Solution {
+    public int magnificentSets(int n, int[][] edges) {
+        
+      
+
+        List<List<Integer>> adj = new ArrayList<>();
+        for(int i = 0 ; i < n ; i ++ ) {
+            adj.add(new ArrayList<>());
+        }
+
+        for(int i = 0 ; i < edges.length ; i ++ ) { 
+            
+
+            int u = edges[i][0];
+            int v = edges[i][1];
+            // since nodes are of 1 based indexing 
+            u--; 
+            v--;
+            adj.get(u).add(v);
+            adj.get(v).add(u);
+        }
+
+        if(!isGraphBipartite(adj)) {
+            return -1;
+        }
+
+        int ans = 1;
+
+        // graph can be disconnected so we have to try to run bfs from each node 
+        // to find a way to get maximum height 
+
+
+        
+        for(int i = 0 ; i < n ; i ++ ) {
+
+            // start bfs from each i 
+            int[] height = new int[n];
+            Queue<Integer> q = new LinkedList<>();
+            height[i] = 1;
+            q.offer(i);
+
+            while(!q.isEmpty()) {
+
+                int node = q.poll();
+                ans = Math.max(ans , height[node]);
+
+                for(int j = 0 ;  j < adj.get(node).size() ; j ++ ) {
+                    int child = adj.get(node).get(j);
+                    if(height[child] == 0 ) {
+                        height[child] = 1 + height[node];
+                        q.offer(child);
+                    }
+                }
+            } 
+        }
+
+
+        return ans;
+
+        
+    }
+
+    // there will be no possibility to divide the nodes  in the graph if and only 
+    // there is an odd length cycle , read pdf for the explanation 
+    // we can check this using the check isGraphBipartite
+
+    public boolean isGraphBipartite(List<List<Integer>> adj ) {
+
+        // if graph is bipartite , it means we can divide it into groups of 2 
+        // if not that means odd length cycle exists 
+
+        int n = adj.size();
+        int[] color = new int[n];
+        Arrays.fill(color , -1);
+
+        for(int i = 0 ; i < n ; i ++ ) {
+            // again doing this for the fact graph can be disconnected
+
+            if(color[i] != -1  ) {
+                continue;
+            }
+
+            color[i] = 0 ;
+            Queue<Integer> q = new LinkedList<>();
+            q.offer(i);
+
+            while(!q.isEmpty()) {
+
+                int node = q.poll();
+                for(int j = 0 ; j < adj.get(node).size() ; j ++ ) {
+
+                    int child = adj.get(node).get(j);
+
+                    if(color[node] == color[child]) {
+                        return false;
+                    }
+
+                    if(color[child] == -1 ) {
+                        color[child] = 1 - color[node];
+                        q.offer(child);
+                    }
+                }
+            }
+        }
+
+
+
+        return true;
+    }
+
+}

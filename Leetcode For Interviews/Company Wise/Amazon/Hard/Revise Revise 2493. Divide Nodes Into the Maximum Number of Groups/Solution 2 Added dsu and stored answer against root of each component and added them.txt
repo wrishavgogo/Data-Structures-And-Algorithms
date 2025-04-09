@@ -1,0 +1,164 @@
+class Solution {
+
+    class DSU {
+
+        int[] parent;
+        int[] sz;
+        int n;
+
+        public DSU(int n) {
+            this.n = n;
+            parent = new int[n];
+            sz = new int[n];
+            for(int i = 0 ; i < n ; i ++ ) {
+                parent[i] = i;
+                sz[i] = 1;
+            }
+        }
+
+        public int root(int i ) {
+
+            while(i != parent[i]) {
+                // path compression
+                parent[i] = parent[parent[i]];
+                i = parent[i];
+            }
+            return i;
+        }
+
+        public void uni(int a , int b ) {
+
+            int root_a = root(a);
+            int root_b = root(b);
+            if(sz[root_a] >= sz[root_b]) {
+                parent[root_b] = root_a;
+                sz[root_a] += sz[root_b];
+            } else {
+                parent[root_a] = root_b;
+                sz[root_b] += sz[root_a];
+            }
+        }
+
+    }
+    public int magnificentSets(int n, int[][] edges) {
+        
+      
+        DSU dsu = new DSU(n);
+        List<List<Integer>> adj = new ArrayList<>();
+        for(int i = 0 ; i < n ; i ++ ) {
+            adj.add(new ArrayList<>());
+        }
+
+        for(int i = 0 ; i < edges.length ; i ++ ) { 
+            
+
+            int u = edges[i][0];
+            int v = edges[i][1];
+            // since nodes are of 1 based indexing 
+            u--; 
+            v--;
+            adj.get(u).add(v);
+            adj.get(v).add(u);
+            dsu.uni(u , v);
+        }
+
+        if(!isGraphBipartite(adj)) {
+            return -1;
+        }
+
+        
+
+        // graph can be disconnected so we have to try to run bfs from each node 
+        // to find a way to get maximum height 
+
+        Map<Integer , Integer > rootToResultMap = new HashMap<>();
+        // containing max for each component
+        
+        for(int i = 0 ; i < n ; i ++ ) {
+
+            int ans = 1;
+            // start bfs from each i 
+            int[] height = new int[n];
+            Queue<Integer> q = new LinkedList<>();
+            height[i] = 1;
+            q.offer(i);
+
+            while(!q.isEmpty()) {
+
+                int node = q.poll();
+                ans = Math.max(ans , height[node]);
+
+                for(int j = 0 ;  j < adj.get(node).size() ; j ++ ) {
+                    int child = adj.get(node).get(j);
+                    if(height[child] == 0 ) {
+                        height[child] = 1 + height[node];
+                        q.offer(child);
+                    }
+                }
+            }
+
+            int rooti = dsu.root(i);
+            rootToResultMap.put(rooti , Math.max(ans , rootToResultMap.getOrDefault(rooti , 0) ));
+        }
+
+
+        int sum = 0;
+
+        for(Map.Entry<Integer ,Integer> entry : rootToResultMap.entrySet()) {
+
+            sum += entry.getValue();
+        }
+
+        return sum;
+        
+    }
+
+    // there will be no possibility to divide the nodes  in the graph if and only 
+    // there is an odd length cycle , read pdf for the explanation 
+    // we can check this using the check isGraphBipartite
+
+    public boolean isGraphBipartite(List<List<Integer>> adj ) {
+
+        // if graph is bipartite , it means we can divide it into groups of 2 
+        // if not that means odd length cycle exists 
+
+        int n = adj.size();
+        int[] color = new int[n];
+        Arrays.fill(color , -1);
+
+        for(int i = 0 ; i < n ; i ++ ) {
+            // again doing this for the fact graph can be disconnected
+
+            if(color[i] != -1  ) {
+                continue;
+            }
+
+            color[i] = 0 ;
+            Queue<Integer> q = new LinkedList<>();
+            q.offer(i);
+
+            while(!q.isEmpty()) {
+
+                int node = q.poll();
+                for(int j = 0 ; j < adj.get(node).size() ; j ++ ) {
+
+                    int child = adj.get(node).get(j);
+
+                    if(color[node] == color[child]) {
+                        return false;
+                    }
+
+                    if(color[child] == -1 ) {
+                        color[child] = 1 - color[node];
+                        q.offer(child);
+                    }
+                }
+            }
+        }
+
+
+
+        return true;
+    }
+
+}

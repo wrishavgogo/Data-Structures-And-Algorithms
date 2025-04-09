@@ -1,0 +1,62 @@
+class Solution {
+    public int maxChunksToSorted(int[] arr) {
+        
+        int n = arr.length;
+        int[] sortedArr = new int[n];
+        for(int i = 0 ; i < n ; i ++ ) {
+            sortedArr[i] = arr[i];
+        }
+        Arrays.sort(sortedArr );
+
+        Map<Integer , Stack<Integer>> valToPositionStackMap = new HashMap<>();
+        for(int i = n - 1;  i >= 0 ; i -- ) { 
+            valToPositionStackMap.computeIfAbsent(sortedArr[i] , (Integer key) -> new Stack<>());
+            valToPositionStackMap.get(sortedArr[i]).push(i);
+        }
+
+        int cnt = 0 ;
+        
+        int i = 0;
+        
+
+        while(i < n ) {
+
+            // doing it from the front 
+            int searchSpace = i;
+            cnt++;
+            while(i <= searchSpace) {
+
+                searchSpace = Math.max(searchSpace , valToPositionStackMap.get(arr[i]).pop());
+                i++;
+            }
+        }
+
+        // we need to do the calc from the back and take the count now 
+        
+        valToPositionStackMap = new HashMap<>();
+        for(i = 0;  i < n ; i ++ ) { 
+            valToPositionStackMap.computeIfAbsent(sortedArr[i] , (Integer key) -> new Stack<>());
+            valToPositionStackMap.get(sortedArr[i]).push(i);
+        }
+
+
+        int newCnt = 0;
+
+        i = n - 1;
+
+        while(i >= 0 ) {
+            // doing it from the back
+            int searchSpace = i;
+            newCnt++;
+            while(i >= searchSpace) {
+                searchSpace = Math.min(searchSpace , valToPositionStackMap.get(arr[i]).pop());
+                i--;
+            }
+        }
+
+        return Math.min(cnt , newCnt);
+
+
+
+    }
+}

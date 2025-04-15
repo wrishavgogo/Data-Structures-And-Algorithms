@@ -1,0 +1,131 @@
+Today : 15th april 2025 , finally am able to understand dynamic segment tree after 4 years graduating out of college , they say loosers are those who give up , those who never give 
+up are not loosers 
+
+What the explanation.pdf to understand and also in the Sexy Data Structures section watch the SparseSegment tree creation , i will now be doing all segment tree questions
+using sparse segment tree only . Its an amazing approach , which gives us ability to store within ranges like 10^18 . 
+
+Code : 
+
+class Solution {
+
+    class Node{
+        int val;
+        Node left;
+        Node right;
+    }
+
+    class SparseSegmentTree {
+
+        Node root ;
+        int L;
+        int R;
+        int defaultVal;
+
+        public SparseSegmentTree(int L , int R , int defaultVal) {
+            root = new Node();
+            this.L = L;
+            this.R = R;
+            this.defaultVal = defaultVal;
+        }
+
+        public void update(Node node , int start , int end , int index , int val) {
+
+            if(start == end ) {
+                // leaf node
+                node.val += val;
+                return ;
+            }
+
+            int mid = start + (end - start)/2;
+            // check which side the index lies 
+            if(index <= mid ) {
+                // left child will have the value
+                if(node.left == null ) {
+                    node.left = new Node();
+                }
+                update(node.left , start , mid , index , val);
+            } else {
+                // right child will have to be called
+                if(node.right == null) {
+                    node.right = new Node();
+                }
+                update(node.right , mid + 1 , end , index , val);
+            }
+
+            int leftValue = node.left != null ? node.left.val : 0;
+            int rightValue = node.right != null ? node.right.val : 0;
+            node.val = leftValue + rightValue;
+        }
+
+        public void updatePoint(int index , int value) {
+            update(root, L , R , index , value );
+        }
+
+
+        public int query(Node node , int start , int end , int ql , int qr ) {
+
+            if(node == null || qr < start || ql > end ) {
+                // out of range of query
+                return defaultVal;
+            }
+            if(ql <= start && end <= qr ) {
+                // node completely lies inside the query range
+                return node.val;
+            }
+            int mid = start + (end - start) / 2;
+            int leftVal = query(node.left , start , mid , ql , qr);
+            int rightVal = query(node.right , mid + 1 , end , ql , qr);
+            return leftVal + rightVal;
+        }
+
+        public int query(int l , int r ) {
+            return query(root , L , R , l , r );
+        }
+
+    }
+
+    public int kBigIndices(int[] nums, int k) {
+        
+        int L = 0;
+        int R = nums.length;
+        SparseSegmentTree left = new SparseSegmentTree(L,R,0);
+        SparseSegmentTree right = new SparseSegmentTree(L,R,0);
+
+        // FILL the right segment tree first with all of nums[i] first
+
+        for(int i = 0 ; i < nums.length ; i ++ ) {
+            right.updatePoint(nums[i] , 1);
+        }
+
+        int ans = 0;
+
+        for(int i = 0 ; i < nums.length ; i ++  ) {
+
+            /***
+                There exist at least k different indices idx1 such that idx1 < i and nums[idx1] < nums[i]
+                basically find how many number are in left segment tree 
+                in the range 1 to nums[i] - 1
+            * */
+            int elementsOnLeftValid = left.query(1 , nums[i] - 1);
+            /**
+                There exist at least k different indices idx2 such that idx2 > i and nums[idx2] < nums[i].
+                basically find how many number are in right segment tree
+                in the range 1 to nums[i] - 1 
+            * */
+            int elementsOnRightValid = right.query(1 , nums[i] - 1);
+
+            if(elementsOnLeftValid >= k && elementsOnRightValid >= k ) {
+                ans++;
+            }
+
+            // insert current element in the left segment tree 
+            left.updatePoint(nums[i] , 1);
+            // remove current element from the right segment tree
+            right.updatePoint(nums[i] , -1);
+            
+        }
+
+        return ans;
+
+    }
+}

@@ -1,0 +1,111 @@
+class Solution {
+    
+    Map<State , List<Integer>> cache = new HashMap<>(); 
+
+    class State {
+
+        int bitmask;
+        int currRem;
+
+        public State(int bitmask , int currRem) {
+            this.bitmask = bitmask;
+            this.currRem = currRem;
+        }
+
+        @Override
+        public int hashCode() {
+            return Objects.hash(bitmask , currRem);
+        }
+
+        @Override
+        public boolean equals(Object o) {
+
+            if(o == null ) {
+                return false;
+            }
+
+            if( ! (o instanceof State)) {
+                return false;
+            }
+
+            State s = (State) o;
+            return this.bitmask == s.bitmask && this.currRem == s.currRem;
+        }
+    }
+
+
+    public int[] concatenatedDivisibility(int[] nums, int k) {
+
+
+        Arrays.sort(nums);
+        int n = nums.length;
+        int[] powerOfTen = new int[n];
+
+        for(int i = 0 ; i < n ; i ++ ) {
+            int val = nums[i];
+            int d = val == 0 ? 0 : (int)Math.log10(val) + 1;
+            powerOfTen[i] = (int) Math.pow(10 , d);
+        }
+
+        int[] ans = new int[n];
+        int finalState = (int)Math.pow(2 , n);
+        finalState--;
+        List<Integer> res = getPermutation(0 , nums , 0 , k , finalState , powerOfTen);
+
+        if(res == null ) {
+            return new int[0];
+        }
+
+        for(int i = 0 ; i < res.size() ; i ++ ) {
+            ans[i] = res.get(i);
+        }
+
+        return ans;  
+    }
+
+    List<Integer> getPermutation(int bitmask , int[] nums , int currRem , int k , int finalState , int[] powerOfTen) {
+
+        if(bitmask == finalState) {
+
+            if(currRem % k == 0 ) {
+                return new ArrayList<>();
+            }
+            return null;
+        }
+
+        State state = new State(bitmask , currRem);
+
+        if(cache.containsKey(state)) {
+            return cache.get(state);
+        }
+
+        List<Integer> ans = null;
+        for(int i = 0 ; i < nums.length ; i ++ ) {
+
+            if( ((bitmask >> i ) & 1) == 0 ) { 
+                int newBitmask = bitmask | (1 << i);
+                int newRem = getNewRemainder(currRem , nums[i] , k , powerOfTen[i]);
+                List<Integer> result = getPermutation(newBitmask, nums , newRem , k , finalState , powerOfTen);
+
+                if(result != null ) {
+                    result.add(0 , nums[i]);
+                    ans = result;
+                    //System.out.println("**");
+                    break;
+                }
+            } 
+        }
+
+        cache.put(state , ans);
+        return cache.get(state);
+    }
+
+    int getNewRemainder(int currRem , int number , int k , int powerOfTen ) {
+
+        int newRem = (currRem * powerOfTen) % k + number;
+        newRem %= k;
+        return newRem;
+    }
+    
+    
+}

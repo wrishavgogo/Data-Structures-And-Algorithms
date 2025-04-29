@@ -1,0 +1,100 @@
+class Solution {
+    public List<String> fullJustify(String[] words, int maxWidth) {
+        
+        List<String> ans = new ArrayList<>();
+
+        int n = words.length;
+        int i = 0;
+
+        while(i < n) {
+
+            int j = i;
+            int wordsTakenTillNow = 0;
+            int charactersTakenTillNow = 0;
+            while(j < n ) {
+                charactersTakenTillNow += words[j].length();
+                wordsTakenTillNow++;
+                int blanks = wordsTakenTillNow - 1;
+                if(charactersTakenTillNow + blanks > maxWidth ) {
+                    charactersTakenTillNow -= words[j].length();
+                    wordsTakenTillNow--;
+                    break;
+                } else {
+                    j++;
+                }
+            }
+
+            // next i starts from current j 
+            
+            StringBuilder sb = new StringBuilder();
+            int blanks = wordsTakenTillNow - 1;
+            int charsLeftToFill = maxWidth - charactersTakenTillNow;
+
+            if(blanks == 0 ) {
+                // only 1 word was taken 
+                // also avoiding division by 0 
+                sb.append(words[i]);
+                while(charsLeftToFill > 0 ) {
+                    sb.append(' ');
+                    charsLeftToFill--;
+                }
+            } else {
+
+                // handling the condition
+                /****
+
+                    Extra spaces between words should be distributed as evenly as possible. If the       number of spaces on a line does not divide evenly between words, the empty slots on the left will be assigned more spaces than the slots on the right.
+                 */
+                int div = charsLeftToFill/blanks;
+                int count = charsLeftToFill % blanks;
+                for(int k = i ; k < j ; k ++ ) {
+                    sb.append(words[k]);
+                    int spacesToFill = div + ( (count > 0) ? 1 : 0);
+                    count--;
+                    while(spacesToFill > 0 && k != j - 1 ) {
+                        // not going to append spaces for the last word 
+                        sb.append(" ");
+                        spacesToFill--;
+                    }
+                }
+            }
+
+            String line = sb.toString();
+            if(j == n ) {
+                // last line and we need to fully left justify it 
+                line = leftJustify(line , maxWidth);
+            }
+            
+            ans.add(line);
+            i = j;
+        }
+
+        return ans;
+    }
+
+    String leftJustify(String line , int maxWidth) {
+
+        StringBuilder sb = new StringBuilder();
+        boolean isLastCharWhiteSpace = false;
+
+        for(int i = 0 ; i < line.length() ; i ++ ) {
+
+            if(line.charAt(i) == ' ' && !isLastCharWhiteSpace ) {
+                sb.append(' ');
+                isLastCharWhiteSpace = true;
+            } 
+
+            if(line.charAt(i) != ' ' ) {
+                sb.append(line.charAt(i));
+                isLastCharWhiteSpace = false;
+            }
+        }
+
+        int remLength = maxWidth - sb.length();
+        while(remLength > 0) {
+            sb.append(' ');
+            remLength--;
+        }
+        return sb.toString();
+    }
+}

@@ -55,3 +55,49 @@ class Solution {
 Code 2 : In place swapping 
 
 // code pending 
+
+
+class Solution {
+    public List<Integer> findDisappearedNumbers(int[] nums) {
+        
+        int n = nums.length;
+        List<Integer> ans = new ArrayList<>();
+        // the reason inplace swapping works here because 
+        // its given in the question 
+        // 1 <= nums[i] <= n
+        
+        for(int i = 0 ; i < n ; i ++ ) {
+
+            int correctIndex = nums[i] - 1;
+
+            while(i + 1  != nums[i]) {
+                // running while till the correct value is not placed 
+                swap(nums , i , nums[i] - 1);
+
+                if(nums[nums[i] - 1] == nums[i]) {
+                    // the value to be swapped is same 
+                    // as current value 
+                    break;
+                }
+            }
+        }
+
+
+        for(int i = 0 ; i < n ; i ++ ) {
+
+            if(nums[i] != (i + 1 )) {
+                ans.add(i + 1);
+            }
+        }
+        
+
+        return ans;
+    }
+
+    public void swap(int[] nums , int idx1 , int idx2) {
+
+        int tmp = nums[idx1];
+        nums[idx1] = nums[idx2];
+        nums[idx2] = tmp;
+    }
+}

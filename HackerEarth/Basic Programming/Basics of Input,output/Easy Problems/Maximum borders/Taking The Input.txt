@@ -1,0 +1,19 @@
+Main part was taking the input , 
+
+ BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
+        int t = Integer.parseInt(br.readLine());
+        
+        while( t > 0 ) {
+            int maxBorder = 0;
+            t--;
+            String str = br.readLine();
+            String[] strSplit = str.split(" ");
+            int n = Integer.parseInt(strSplit[0]);
+            int m = Integer.parseInt(strSplit[1]);
+
+            char[][] ans = new char[n][m];
+
+            for(int i = 0 ; i < n ; i ++ ) {
+                String row = br.readLine();
+                ans[i] = row.toCharArray();  ----> very important while converting the String to a character array 
+            }  

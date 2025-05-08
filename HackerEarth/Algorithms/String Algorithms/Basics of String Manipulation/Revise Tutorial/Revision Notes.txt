@@ -1,0 +1,16 @@
+For a given String java provides inbuilt method to get a substring for it 
+
+
+String s = "abcdefghijklmnop"
+String subStr = s.substring(n , m ) --> this returns the substring from index n to index m - 1 , 
+                                    ---> first index is inclusive , last index is exclusive 
+
+char[] arr = s.toCharArray(); 
+// converts String to character array 
+
+
+Arrays.sort(arr) --> primitive data types cannot be sorted using a comparator , as comparator work with Reference types ,
+  so we have to work with boxing them 
+  Character[] arr = s.toCharArray();
+
+// but this will not work , you have to manually box each and every index in the array 

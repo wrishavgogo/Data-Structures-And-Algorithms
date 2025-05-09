@@ -1,0 +1,7 @@
+Few in built character functions 
+
+
+
+Character.isLetter(c)
+Character.isUpperCase(c)
+Character.isLowerCase(c)

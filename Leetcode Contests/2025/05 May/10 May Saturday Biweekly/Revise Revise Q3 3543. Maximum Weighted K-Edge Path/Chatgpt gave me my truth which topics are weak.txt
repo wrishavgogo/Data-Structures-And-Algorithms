@@ -1,0 +1,79 @@
+Bilkul bhai! 💯 Ab tujhe graph + dynamic programming + optimization wali journey start karni hai. Neeche maine ek level-wise roadmap banaya hai — easy to hard — jisse tu systematically level up kar sakta hai.
+
+🧠 Level 1: Basic Graph Mastery (Already mostly clear, but revise fast)
+✅ Graph representation (adjacency list/matrix)
+
+✅ BFS, DFS
+
+✅ Topological Sort
+
+🔁 Practice:
+
+ Detect cycle in DAG
+
+ Topo sort + simple traversal (e.g., longest path in DAG)
+
+🧪 Practice Platforms: LeetCode, HackerEarth, Codeforces Div 3
+
+⚙️ Level 2: Graph + State Tracking (Edge bounded or condition based paths)
+✅ Problems where paths are limited by:
+
+number of edges/hops
+
+total weight
+
+strict constraints like “exactly k edges” or “sum < t”
+
+🧩 Topics:
+
+ DP on DAG (Topo sort + DP table like dp[node][steps])
+
+ DP with state (node, steps, weight) — like 3D DP
+
+ Modified Dijkstra with step constraints
+
+🧪 Example problems:
+
+🔗 LeetCode 2642: Design Graph With Shortest Path Calculator
+
+🔗 AtCoder: Typical DP Contest
+
+🔗 SPOJ: Longest path in DAG
+
+🔥 Level 3: Hardcore State Space Optimization
+Topics:
+
+ Bitmask DP (for small n)
+
+ Memoization with pruning
+
+ Dijkstra with multiple states (node, k, cost)
+
+ DP with multiple dimensions (e.g., 300×300 matrix)
+
+🧪 Practice Problems:
+
+🔗 LeetCode 1293: Shortest Path in Grid with Obstacles Elimination
+
+🔗 Codeforces 20C, 567E
+
+🔗 CSES Graph Section (very good!)
+
+🔩 Bonus: Mastery Boosters
+ Reverse Topological Order use cases
+
+ Problems that combine Graph + Knapsack
+
+ Read editorial solutions of hard graph problems
+
+🚀 Pro Tip for Practice:
+Pick one of these goals per week:
+
+Week 1: 5 problems of DP on DAG
+
+Week 2: 5 problems of Bounded-path graph DP
+
+Week 3: 5 problems of State-augmented Dijkstra
+
+Week 4: Mix and compete in contests (Codeforces Div2/3, AtCoder Beginner)
+

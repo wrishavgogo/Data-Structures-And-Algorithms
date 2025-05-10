@@ -1,0 +1,6 @@
+
+Fenwick tree is an intuitive solution 
+once you understand the part the range query is required for each of the kth element 
+
+Then focus on the Monotonic Stack approach , I know you are weak in this part but dont worry , we will be 
+SOLO LEVELLING UP 

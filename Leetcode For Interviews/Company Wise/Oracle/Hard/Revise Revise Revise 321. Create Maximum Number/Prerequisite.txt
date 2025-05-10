@@ -1,0 +1,3 @@
+Link : https://github.com/wrishavgogo/Data-Structures-And-Algorithms/tree/main/Leetcode%20For%20Interviews/Company%20Wise/Uber/Medium/Revise%20Revise%201673.%20Find%20the%20Most%20Competitive%20Subsequence
+
+Very good understanding of monotonic stack and good hold on it 

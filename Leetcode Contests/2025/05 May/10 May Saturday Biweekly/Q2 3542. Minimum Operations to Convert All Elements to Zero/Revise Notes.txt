@@ -1,0 +1,4 @@
+I was only able to solve it , 
+because i did a monotonic stack question today
+
+I have to get back into flow state , to be able to come up with these logics super easily 

@@ -30,4 +30,36 @@ Constraints:
 
 Code : TODO 
 
+class Solution {
+    public int[] mostCompetitive(int[] nums, int k) {
+        
 
+        Stack<Integer> st = new Stack<>();
+        int n = nums.length;
+        int toRemove = n - k ;
+
+        for(int i = 0 ; i < n ; i ++ ) {
+            while(!st.isEmpty() && toRemove > 0 && st.peek() > nums[i] ) {
+                st.pop();
+                toRemove--;
+            }
+            st.push(nums[i]);
+        }
+
+        while(toRemove > 0 ) {
+            st.pop();
+            toRemove--;
+        }
+
+        int m = st.size();
+        int[] ans = new int[m];
+
+        for(int i = m - 1;  i >= 0 ; i -- ) {
+            ans[i] = st.pop();
+        }
+
+        return ans;
+
+        
+    }
+}

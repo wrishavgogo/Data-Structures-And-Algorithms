@@ -1,0 +1,2 @@
+Understood it was a dp problem , just have to find the recurrence properly 
+will store my rough work and intuition 

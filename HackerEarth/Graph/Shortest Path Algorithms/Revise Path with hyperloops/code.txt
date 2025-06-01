@@ -1,0 +1,111 @@
+import java.io.BufferedReader;
+import java.io.InputStreamReader;
+import java.util.*;
+class TestClass {
+
+    final static int MAX_WEIGHT = 2;
+    final static int MAX_DISTANCE = 10000000;
+    public static void main(String args[] ) throws Exception {
+        //BufferedReader
+        BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
+
+        String input = br.readLine();
+        String[] splitInput = input.split(" ");
+        int n = Integer.parseInt(splitInput[0]);
+        int m = Integer.parseInt(splitInput[1]);
+        int k = Integer.parseInt(splitInput[2]);
+        int start = Integer.parseInt(splitInput[3]);
+        int end = Integer.parseInt(splitInput[4]);
+
+
+        start--;
+        end--;
+
+        List<List<int[]>> graph = new ArrayList<>();
+
+        for(int i = 0 ; i < n ; i ++ ) {
+            graph.add(new ArrayList<>());
+        }
+
+        for(int i = 0 ; i < m ; i ++ ) {
+            String edgeString = br.readLine();
+            String[] edgeSplit = edgeString.split(" ");
+            int u = Integer.parseInt(edgeSplit[0]);
+            int v = Integer.parseInt(edgeSplit[1]);
+            if(u < 0 || u > n || v < 0 || v > n ) {
+                System.out.println(u + "," + v + " -> " + 1);
+            }
+            graph.get(u - 1).add(new int[]{v - 1  , 1});
+            graph.get(v - 1).add(new int[]{u - 1  , 1});
+        }
+
+        for(int i = 0 ; i < k ; i ++ ) {
+            String hyperLoopString = br.readLine();
+            String[] hyperLoopSplit = hyperLoopString.split(" ");
+            int u = Integer.parseInt(hyperLoopSplit[0]);
+            int v = Integer.parseInt(hyperLoopSplit[1]);
+            if(u < 0 || u > n || v < 0 || v > n ) {
+                System.out.println(u + "," + v + " -> " + 2);
+            }
+            graph.get(u - 1).add(new int[]{v - 1  , 2});
+            graph.get(v - 1).add(new int[]{u - 1 , 2});
+        }
+
+
+        int[] distance = new int[n];
+        Arrays.fill(distance , MAX_DISTANCE);
+
+
+        // implementing dial's algo 
+
+        List<Set<Integer>> bucket = new ArrayList<>();
+        int bucketSize = MAX_WEIGHT*(n - 1) + 1 ;
+
+        for(int i = 0 ; i < bucketSize ; i ++ ) {
+            bucket.add(new HashSet<>());
+        }
+
+        distance[start] = 0;
+        bucket.get(0).add(start);
+
+
+        for(int i = 0 ; i < bucket.size() ; i ++ ) {
+
+            Set<Integer> st = bucket.get(i);
+
+            if(st.size() == 0 ) {
+                continue;
+            }
+
+            Iterator it = st.iterator();
+
+            while(it.hasNext()) {
+                int node = (int) (it.next());
+                
+                for(int[] edge : graph.get(node)) {
+                    
+                    int child = edge[0];
+                    int weight = edge[1];
+                    if(distance[child]  == MAX_DISTANCE) {
+                        int newDistance = distance[node] + weight;
+                        bucket.get(newDistance).add(child);
+                        distance[child] = newDistance;
+                    } else {
+                        int oldDistance = distance[child];
+                        int newDistance = distance[node] + weight;
+                        if(newDistance < oldDistance ) {
+                            bucket.get(oldDistance).remove(child);
+                            bucket.get(newDistance).add(child);
+                            distance[child] = newDistance;
+                        }
+                        
+                    }
+                }
+            }
+        }
+
+        int ans = distance[end] == MAX_DISTANCE ? -1 : distance[end];
+
+        System.out.println(ans);
+    }
+}

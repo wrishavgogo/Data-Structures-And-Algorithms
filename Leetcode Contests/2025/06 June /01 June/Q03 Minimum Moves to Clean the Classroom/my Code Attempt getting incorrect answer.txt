@@ -1,0 +1,130 @@
+class Solution {
+
+    final int max_mask_size = ((int)Math.pow(2 , 10)) ;
+    int[][][][] visited = new int[20][20][51][max_mask_size];
+    int[][] directions = {{1 , 0} , {-1 , 0} , {0 , -1} , {0 , 1}};
+    
+
+    class BFSNode {
+
+        int x;
+        int y;
+        int energy;
+        int mask;
+        int moves;
+
+        public BFSNode(int x , int y , int energy , int mask , int moves) {
+            this.x = x;
+            this.y = y;
+            this.energy = energy;
+            this.mask = mask;
+            this.moves = moves;
+        }
+    }
+
+
+
+    public int minMoves(String[] classroom, int energy) {
+        
+        int n = classroom.length;
+        int m = classroom[0].length();
+
+
+        Map<String , Integer> mp = new HashMap<>();
+        int count = 0;
+        int startX = 0;
+        int startY = 0;
+        for(int i = 0 ; i < n ; i ++ ) {
+            for(int j = 0 ; j < m ; j ++ ) {
+                
+                if(classroom[i].charAt(j) == 'L') {
+                    String pos = String.valueOf(i) + "~" + String.valueOf(j);
+                    mp.put(pos , count);
+                    count++;
+                }
+                if(classroom[i].charAt(j) == 'S') {
+                   startX = i;
+                   startY = j; 
+                }
+            }
+        }
+        
+        Queue<BFSNode> q = new LinkedList<>();
+        q.offer(new BFSNode(startX , startY , energy , 0 , 0));
+        visited[startX][startY][energy][0] = 1;
+
+        int final_mask = ((int)Math.pow(2 , count)) - 1;
+
+        while(!q.isEmpty()) {
+
+            BFSNode node = q.poll();
+            if(node.mask == final_mask ) {
+                return node.moves;
+            }
+
+            int curX = node.x;
+            int curY = node.y;
+            int curEnergy = node.energy;
+            int curMoves = node.moves;
+            int curMask = node.mask;
+
+            for(int i = 0 ; i < directions.length ; i ++ ) {
+
+                int newX = curX + directions[i][0];
+                int newY = curY + directions[i][1];
+
+                if(!isValid(newX , newY ,classroom)) {
+                    continue;
+                }
+
+                if(classroom[newX].charAt(newY) == 'X') {
+                    continue;
+                }
+
+                char c = classroom[curX].charAt(curY);
+                int newEnergy = curEnergy;
+                int newMoves = curMoves;
+                int newMask = curMask;
+                newMoves++;
+                if(c == 'L') {
+                    newEnergy--;
+                    String key = String.valueOf(curX) + "~" + String.valueOf(curY);
+                    int bit = mp.get(key);
+                    newMask = newMask | (1 << bit);
+                } else if (c == 'R') {
+                    newEnergy = energy;
+                } else {
+                    newEnergy--;
+                }
+
+                if(newEnergy < 0 ) {
+                    // cannot travel to that cell 
+                    continue;
+                }
+
+                if(visited[newX][newY][newEnergy][newMask] == 1 ) {
+                    // already visited the state
+                    continue;
+                }
+                System.out.println(newX + "," + newY + "," + newMask);
+                q.offer(new BFSNode(newX , newY , newEnergy , newMask , newMoves));
+                visited[newX][newY][newEnergy][newMask] = 1;
+
+            }
+
+
+        }
+        
+        return -1;
+
+    }
+
+
+    boolean isValid(int x , int y , String[] classroom) {
+
+        int n = classroom.length;
+        int m = classroom[0].length();
+        return ( x >= 0 && x < n && y >= 0 && y < m );
+    }
+
+}

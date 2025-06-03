@@ -1,0 +1,158 @@
+class StockPrice {
+
+    class Node {
+        int val;
+        Node left;
+        Node right;
+    }
+
+    class MaxSegmentTree {
+
+        Node root;
+        int def;
+        int L ; 
+        int R ; 
+
+        public MaxSegmentTree(int L , int R ) {
+            this.L = L ;
+            this.R = R ;
+            this.def = Integer.MIN_VALUE;
+            root = new Node();
+        }
+
+        private void update(int start , int end , Node node , int index , int value) {
+
+
+            if(start == end ) {
+                node.val = value;
+                return ;
+            }
+
+            int mid = (start + end)/2;
+
+            if(index <= mid ) {
+
+                if(node.left == null ) {
+                    node.left = new Node();
+                }
+                update(start , mid , node.left , index , value);
+            } else {
+
+                if(node.right == null ) {
+                    node.right = new Node();
+                }
+                update(mid + 1 , end  , node.right ,  index , value);
+            }
+
+            int leftVal = node.left == null ? def : node.left.val;
+            int rightVal = node.right == null ? def : node.right.val;
+
+            node.val = Math.max(leftVal , rightVal);
+        }
+
+        public void update(int index , int val) {
+            update(L , R , root , index , val);
+        }
+
+        public int query() {
+            return root.val;
+        }
+
+    }
+
+    class MinSegmentTree  {
+
+        Node root;
+        int def;
+        int L ; 
+        int R ; 
+
+        public MinSegmentTree(int L , int R ) {
+            this.L = L ;
+            this.R = R ;
+            this.def = Integer.MAX_VALUE;
+            root = new Node();
+        }
+
+        private void update(int start , int end , Node node , int index , int value) {
+
+            if(start == end ) {
+                node.val = value;
+                return ;
+            }
+
+            int mid = (start + end)/2;
+
+            if(index <= mid ) {
+
+                if(node.left == null ) {
+                    node.left = new Node();
+                }
+                update(start , mid , node.left , index , value);
+            } else {
+
+                if(node.right == null ) {
+                    node.right = new Node();
+                }
+                update(mid + 1 , end  , node.right , index , value);
+            }
+
+            int leftVal = node.left == null ? def : node.left.val;
+            int rightVal = node.right == null ? def : node.right.val;
+
+            node.val = Math.min(leftVal , rightVal);
+        }
+
+        public void update(int index , int val) {
+            update(L , R , root , index , val);
+        }
+
+        public int query() {
+            return root.val;
+        }
+
+    }
+
+    MaxSegmentTree maxSegmentTree;
+    MinSegmentTree minSegmentTree;
+    int latestTimeStamp = 0;
+    int currentPrice = 0;
+
+    public StockPrice() {
+        maxSegmentTree = new MaxSegmentTree(1 , (int)(1e9));
+        minSegmentTree = new MinSegmentTree(1 , (int)(1e9));
+    }
+    
+    public void update(int timestamp, int price) {
+        
+        maxSegmentTree.update(timestamp , price);
+        minSegmentTree.update(timestamp , price);
+        if(latestTimeStamp <= timestamp ) {
+            latestTimeStamp = timestamp;
+            currentPrice = price;
+        }
+    }
+    
+    public int current() {
+        return currentPrice;
+    }
+    
+    public int maximum() {
+        
+        return maxSegmentTree.query();
+    }
+    
+    public int minimum() {
+
+        return minSegmentTree.query();
+    }
+}
+
+/**
+ * Your StockPrice object will be instantiated and called as such:
+ * StockPrice obj = new StockPrice();
+ * obj.update(timestamp,price);
+ * int param_2 = obj.current();
+ * int param_3 = obj.maximum();
+ * int param_4 = obj.minimum();
+ */

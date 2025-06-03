@@ -1,0 +1,4 @@
+Simple binary search 
+just keep a condition that in which condition 
+is the eating of bananas being satisfied in h hours
+and then keep minimizing the speed of eating bananas 

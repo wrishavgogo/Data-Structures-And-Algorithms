@@ -1,0 +1,47 @@
+class Solution {
+    public String rankTeams(String[] votes) {
+        
+
+        Integer[][] indexAndCharMap = new Integer[26][27];
+
+        for(int i = 0 ; i < 26 ; i ++ ) {
+            for(int j = 0 ; j < 27 ; j ++ ) {
+                indexAndCharMap[i][j] = 0;
+            }
+        }
+
+        // i -> represents each character 
+        // j -> represents each index of the vote
+        for(int i = 0 ; i < 26 ; i ++ ) {
+            indexAndCharMap[i][26] = i ;
+        }
+
+        for(String vote : votes ) {
+
+            for(int j = 0 ; j < vote.length() ; j ++ ) {
+                char c = vote.charAt(j);
+                indexAndCharMap[c-'A'][j]--;
+            }
+        }
+
+        Arrays.sort(indexAndCharMap , (Integer[] a , Integer[] b) -> {
+
+            int n = a.length;
+            for(int j = 0 ; j < n ; j ++ ) {
+                if((int)a[j] != (int)b[j]) {
+                    return a[j] - b[j];
+                }
+            }
+
+            return 0;
+        });
+
+        StringBuilder sb = new StringBuilder();
+
+        for(int len = 0 ; len < votes[0].length() ; len++) {
+            sb.append((char)('A' + indexAndCharMap[len][26]));
+        }
+
+        return sb.toString();
+    }
+}

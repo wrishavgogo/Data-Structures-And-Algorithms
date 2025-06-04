@@ -1,0 +1,69 @@
+Transition state is wrong 
+code is failing in the test case -> [[1,1,-1],[1,-1,1],[-1,1,1]]
+
+
+
+class Solution {
+    public int cherryPickup(int[][] grid) {
+        
+
+        int n = grid.length;
+        int inf = 100000;
+
+        int[][][] dp = new int[n][n][n];
+
+        // two paths going from (0 , 0) to  (n - 1 , n - 1)
+
+        for(int r1 = 0 ; r1 < n ; r1 ++ ) {
+            for(int c1 = 0 ; c1 < n ; c1 ++ ) {
+                for(int r2 = 0 ; r2 < n ; r2 ++ ) {
+
+                    int c2 = r1 + c1 - r2;
+                    if(c2 < 0 || c2 >= n ) {
+                        continue;
+                    }
+
+                    int cherryCount = 0;
+                    
+                    if(r1 == r2 && c1 == c2 ) {
+                        cherryCount = grid[r1][c1] == -1 ? -inf : grid[r1][c1];
+                    } else {
+                        cherryCount += grid[r1][c1] == -1 ? -inf : grid[r1][c1];
+                        cherryCount += grid[r2][c2] == -1 ? -inf : grid[r2][c2];
+                    }
+
+                    // System.out.println(r1 + "," + c1 + "  "  +
+                    //  r2 + "," + c2 + " ==" +  cherryCount + "  cherry count stats");
+
+                    int ans = cherryCount;
+                    // case 1 both came to their cells from up 
+                    if(r1 - 1 >= 0 && r2 - 1 >= 0 ) {
+                        ans = Math.max(ans , 
+                        cherryCount + dp[r1 - 1][c1][r2 - 1]);
+                    }
+                    // case 2 both came from left 
+                    if(c1 - 1 >= 0 && c2 - 1 >= 0 ) {
+                        ans = Math.max(ans , 
+                        cherryCount + dp[r1][c1 - 1][r2]);
+                    }
+                    // 1st comes from top , next from left 
+                    if(r1 - 1 >= 0 && c2 - 1 >= 0  ) {
+                        ans = Math.max(ans , 
+                        cherryCount + dp[r1 - 1][c1][r2]);
+                    }
+                    // 1st comes from left , next from top 
+                    if(c1 - 1 >= 0 && r2 - 1 >= 0 ) {
+                        ans = Math.max(ans , 
+                        cherryCount + dp[r1][c1 - 1][r2 - 1]);
+                    }
+
+                    dp[r1][c1][r2] = ans;
+                    System.out.println(r1 + "," + c1 + "  "  +
+                     r2 + "," + c2 + " ==" +  dp[r1][c1][r2]);
+                }
+            }
+        }
+
+        return dp[n-1][n-1][n-1] <= 0 ? 0 : dp[n-1][n-1][n-1];
+    }
+}

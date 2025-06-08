@@ -1,0 +1,90 @@
+class Solution {
+
+    public long countSubarrays(int[] nums, int minK, int maxK) {
+        
+        long ans = 0;
+        
+
+        int n = nums.length;
+        int[] prefix = new int[n];
+
+        TreeSet<Integer> minKPositions = new TreeSet<>();
+        TreeSet<Integer> maxKPositions = new TreeSet<>();
+
+        for(int i = 0 ; i < nums.length ; i ++ ) {
+
+            int outOfBound = 0;
+            if(nums[i] == minK) {
+                minKPositions.add(i);
+            }
+            if(nums[i] == maxK) {
+                maxKPositions.add(i);
+            }
+
+            if(nums[i] > maxK || nums[i] < minK ) {
+                outOfBound = 1;
+            }
+
+            if(i == 0 ) {
+                prefix[i] = outOfBound;
+            } else {
+                prefix[i] = outOfBound + prefix[i - 1];
+            }
+
+        }
+
+        // setup is complete till this point 
+
+
+        for(int i = 0 ; i < n ; i ++ ) {
+
+            if(nums[i] > maxK || nums[i] < minK) {
+                continue;
+            }
+
+            Integer v1 = minKPositions.ceiling(i);
+            Integer v2 = maxKPositions.ceiling(i);
+            int nextMinPos = v1 == null ? -1 : v1.intValue();
+            int nextMaxPos = v2 == null ? -1 : v2.intValue();
+
+            if(nextMinPos == -1 || nextMaxPos == -1 ) {
+                continue;
+            }
+
+            int maxPos = Math.max(nextMinPos , nextMaxPos);
+
+            if(getSum(i , maxPos , prefix) > 0 ) {
+                // cannot pick this range , as out of bound elements are present 
+                continue;
+            }
+
+            int lo = maxPos + 1;
+            int hi = n - 1;
+            long length = 0;
+            while(lo <= hi ) {
+
+                int mid = (lo + hi)/2;
+                if(getSum(maxPos + 1 , mid , prefix) == 0 ) {
+                    length = Math.max(length , (long)mid - (long)maxPos);
+                    lo = mid + 1;
+                } else {
+                    hi = mid - 1;
+                }
+            }
+
+            ans += (1 + length);
+
+        }
+
+        return ans;
+    }
+
+    public int getSum(int l , int r , int[] prefix) {
+
+        if(l == 0 ) {
+            return prefix[r];
+        }
+
+        return prefix[r] - prefix[l - 1];
+    }
+}

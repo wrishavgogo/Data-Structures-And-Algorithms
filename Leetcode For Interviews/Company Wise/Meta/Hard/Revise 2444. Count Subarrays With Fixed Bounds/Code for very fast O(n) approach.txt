@@ -1,0 +1,43 @@
+class Solution {
+
+    public long countSubarrays(int[] nums, int minK, int maxK) {
+        
+        long ans = 0;
+
+        int n = nums.length;
+        long minKLeftMostIndex = n;
+        long maxKLeftMostIndex = n;
+        long outOfBoundLeftMostIndex = n;
+
+
+        
+
+
+        for(int i = n - 1 ; i >= 0 ; i -- ) {
+
+            if(nums[i] == minK) {
+                minKLeftMostIndex = Math.min(minKLeftMostIndex , (long)i);
+            }
+
+            if(nums[i] == maxK) {
+                maxKLeftMostIndex = Math.min(maxKLeftMostIndex , (long)i);
+            }
+
+            if(nums[i] > maxK || nums[i] < minK ) {
+                outOfBoundLeftMostIndex = Math.min(outOfBoundLeftMostIndex , (long)i);
+            }
+
+            if(minKLeftMostIndex == n || maxKLeftMostIndex == n ) {
+                continue;
+            }
+
+            long maxi = Math.max(minKLeftMostIndex ,maxKLeftMostIndex );
+
+            ans += Math.max(0 , outOfBoundLeftMostIndex - maxi);
+        }
+
+        return ans;
+    }
+
+   
+}
